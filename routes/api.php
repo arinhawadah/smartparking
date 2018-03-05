@@ -21,5 +21,5 @@ Route::post('auth/login','AuthController@login');
 Route::get('users/profile','UserController@profile')->middleware('auth:api');
 Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
 Route::get('users','UserController@users');
-Route::post('reservation','ReservationBufferController@add')->middleware('auth:api');
+Route::post('reservation','ReservationController@add')->middleware('auth:api');
 Route::get('carparkslot','CarParkSlotController@status');
