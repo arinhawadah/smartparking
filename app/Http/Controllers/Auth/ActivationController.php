@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
+use App\Role;
 use App\UserRegistration;
 use Auth;
 use DB;
@@ -16,7 +17,7 @@ class ActivationController extends Controller
        
         $user_registration = UserRegistration::where('email', $request->email)->where('activation_token', $request->token)->firstOrFail();
 
-        DB::table('user_credentials')->insert(
+        $user = DB::table('user_credentials')->insert(
             array(
                 'unique_id' => $user_registration->unique_id, 
                 'name' => $user_registration->name,
@@ -29,6 +30,8 @@ class ActivationController extends Controller
                 'updated_at' => now(),
             )
         );
+
+        $user->roles()->attach(Role::where('role_name', 'User')->first());
 
         // Auth::loginUsingId($user->id);
 

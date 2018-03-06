@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use App\Http\Requests;
 use App\UserRegistration;
 use App\User;
+use App\Role;
 use App\Transformers\UserTransformer;
 use App\Transformers\UserCredentialTransformer;
 use Mail;
@@ -34,6 +35,8 @@ class AuthController extends Controller
             'car_type' => $request->car_type,
             'license_plate_number' => $request->license_plate_number,
         ]);
+
+        $user_registration->roles()->attach(Role::where('role_name', 'User')->first());
         
         //sending email
         event(new UserActivationEmail($user_registration));
