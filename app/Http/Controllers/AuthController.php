@@ -21,7 +21,7 @@ class AuthController extends Controller
         $this->validate($request, [
             'name' => 'required',
             'email'=> 'required|email|unique:user_registrations',
-            'password'=>'required|min:6',
+            'password'=>'required|min:6|confirmed',
             'car_type'=>'required',
             'license_plate_number' => 'required|max:10',
         ]);
@@ -35,9 +35,7 @@ class AuthController extends Controller
             'car_type' => $request->car_type,
             'license_plate_number' => $request->license_plate_number,
         ]);
-
-        $user_registration->roles()->attach(Role::where('role_name', 'User')->first());
-        
+       
         //sending email
         event(new UserActivationEmail($user_registration));
         // $this->guard()->logout();
@@ -59,8 +57,45 @@ class AuthController extends Controller
         return response()->json($response, 201);
     }
 
+    public function registerAdmin(Request $request, User $user)
+    {
+        $this->validate($request, [
+            'name' => 'required',
+            'email'=> 'required|email|unique:user_registrations',
+            'password'=>'required|min:6|confirmed',
+            'car_type'=>'required',
+            'license_plate_number' => 'required|max:10',
+        ]);
+
+        $user = $user->create([
+            'unique_id' => str_random(25),
+            'name' => $request->name,
+            'email' => $request->email,
+            'password'=>bcrypt($request->password),
+            'activation_token' => str_random(25),
+            'car_type' => $request->car_type,
+            'license_plate_number' => $request->license_plate_number,
+        ]);
+
+        $user
+        ->roles()
+        ->attach(Role::where('role_name', 'Admin')
+        ->first());
+       
+        return fractal()
+        ->item($user)
+        ->transformWith(new UserCredentialTransformer)
+        ->addMeta([
+            'activation token' => $user->activation_token,
+        ])
+        ->toArray();
+
+        return response()->json($response, 201);
+    }
+
     public function login(Request $request, User $user)
     {
+
         $this->validate($request, [
             'email' => [
                 'required','string',

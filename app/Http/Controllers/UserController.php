@@ -9,8 +9,10 @@ use Auth;
 
 class UserController extends Controller
 {
-    public function users(User $user)
+    public function users(Request $request, User $user)
     {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
         $users = $user->all();
 
         return fractal()
@@ -37,6 +39,7 @@ class UserController extends Controller
             'email' => 'required|unique:user_credentials'.$user->id.',id_user',
             'car_type' => 'required',
             'license_plate_number' => 'required',
+            'password' => 'required|min:6|confirmed',
             ];
 
         $input = [
@@ -44,6 +47,7 @@ class UserController extends Controller
             'email' => $request['email'],
             'car_type' => $request['car_type'],
             'license_plate_number' => $request['license_plate_number'],
+            'password' =>  bcrypt($request['password']),
         ];
         
         $this->validate($request, $constraints);

@@ -7,6 +7,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
+        /**
+    * The attributes that aren't mass assignable.
+    *
+    * @var array
+    */
+    protected $guarded = ['remember_token'];
+    
     protected $table = 'user_credentials';
 
         /**
@@ -24,7 +31,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password'
+        'password','activation_token','remember_token'
     ];
 
     protected $primaryKey = 'id_user';
@@ -41,9 +48,11 @@ class User extends Authenticatable
     {
     if (is_array($roles)) {
         return $this->hasAnyRole($roles) || 
+        // response()->json(['error'=>'This action is unauthorized.',401]);
                 abort(401, 'This action is unauthorized.');
     }
     return $this->hasRole($roles) || 
+    // response()->json(['error'=>'This action is unauthorized.',401]);
             abort(401, 'This action is unauthorized.');
     }
     /**

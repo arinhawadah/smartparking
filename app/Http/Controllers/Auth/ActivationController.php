@@ -17,8 +17,8 @@ class ActivationController extends Controller
        
         $user_registration = UserRegistration::where('email', $request->email)->where('activation_token', $request->token)->firstOrFail();
 
-        $user = DB::table('user_credentials')->insert(
-            array(
+        $user = User::create(
+            [
                 'unique_id' => $user_registration->unique_id, 
                 'name' => $user_registration->name,
                 'email' => $user_registration->email,
@@ -28,14 +28,19 @@ class ActivationController extends Controller
                 'activation_token'=> str_random(25),
                 'created_at' => now(),
                 'updated_at' => now(),
-            )
+            ]
         );
 
-        $user->roles()->attach(Role::where('role_name', 'User')->first());
+        $user
+        ->roles()
+        ->attach(Role::where('role_name', 'User')
+        ->first());
 
         // Auth::loginUsingId($user->id);
 
         // return redirect()->route('home')->withSuccess('Aktif, skrg kamu signed in');
         return "Thank You";
     }
+
+    
 }
