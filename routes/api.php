@@ -16,11 +16,15 @@ use Illuminate\Http\Request;
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
+
+//user
 Route::post('auth/user/register','AuthController@register');
-Route::post('auth/admin/register', 'AuthController@registerAdmin');
 Route::post('auth/login','AuthController@login');
-Route::get('users/profile','UserController@profile')->middleware('auth:api');
+Route::get('users/profile','UserController@profile')->middleware('auth.basic');
 Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
 Route::get('users','UserController@users')->middleware('auth:api');
-Route::post('reservation','ReservationController@add')->middleware('auth:api');
+Route::post('reservation','ReservationController@addReservation')->middleware('auth:api');
 Route::get('carparkslot','CarParkSlotController@status');
+//admin
+Route::post('auth/admin/register', 'AuthController@registerAdmin');
+Route::put('admin/updatereserevation/{id_reservation}','ReservationController@updateReservation')->middleware('auth.basic');

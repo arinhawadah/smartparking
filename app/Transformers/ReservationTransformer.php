@@ -10,9 +10,9 @@ class ReservationTransformer extends TransformerAbstract
 {
     public function transform(ReservationBuffer $reservation_buffer)
     {
-        $user_park = UserPark::where('id_reservation', $reservation_buffer->id)->firstOrFail();
+        $user_park = UserPark::where('id_reservation', $reservation_buffer->id_reservation)->firstOrFail();
         return[
-            'id_reservation' => $reservation_buffer->id,
+            'id_reservation' => $reservation_buffer->id_reservation,
             'id_slot' => $reservation_buffer->id_slot,
             'arrive_time' => $user_park->arrive_time,
             'leaving_time' => $user_park->leaving_time,

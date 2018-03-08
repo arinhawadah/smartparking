@@ -11,4 +11,6 @@ class ReservationBuffer extends Model
     protected $fillable =[
         'id_user', 'id_slot', 'validity_limit',
     ];
+
+    protected $primaryKey = 'id_reservation';
 }

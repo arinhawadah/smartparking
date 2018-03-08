@@ -13,7 +13,7 @@ use App\Transformers\ReservationTransformer;
 
 class ReservationController extends Controller
 {
-    public function add(Request $request, ReservationBuffer $reservation_buffer)
+    public function addReservation(Request $request, ReservationBuffer $reservation_buffer)
     {
         $this->validate($request,[
             'coordinate' => 'required',
@@ -95,5 +95,83 @@ class ReservationController extends Controller
         );
 
         return $car_park_slot_dump;
+    }
+
+    // update reservation
+    public function updateReservation(Request $request, ReservationBuffer $reservation_buffer, $id_reservation)
+    {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
+        $reservation_buffer = ReservationBuffer::findOrFail($id_reservation);
+        $constraints = [
+            'coordinate' => 'required',
+            'arrive_time' => 'required',
+            'leaving_time' => 'required',
+            'price' => 'required'
+            ];
+
+        $input = [
+            'coordinate' => $request['coordinate'],
+            'arrive_time' => $request['arrive_time'],
+            'leaving_time' => $request['leaving_time'],
+            'price' => $request['price'],
+        ];
+
+        $coordinate = $request->coordinate;
+        $update = $request->except('coordinate');
+        $this->updateStatus($coordinate);
+
+        $slot = CarParkSlot::where('coordinate', $coordinate)
+        ->pluck('id_slot')
+        ->first();
+
+        $this->createCarParkSlotDumps($slot, $coordinate);
+
+        $reservation_buffer = $reservation_buffer->where('id_reservation', $id_reservation)->update([
+            'id_slot' => $slot,
+            'validity_limit' => now(),
+        ]);
+
+        $this->validate($request, $constraints);
+
+        $this->updateReservationTime($update, $id_reservation);
+        
+        return fractal()
+        ->item($reservation_buffer)
+        ->transformWith(new ReservationTransformer)
+        ->toArray();
+
+        return response()->json($response, 201);
+    }
+
+    // update table car_park_slot_dump
+    private function updateCarParkSlotDumps($slot, $coordinate)
+    {
+            $car_park_slot_dump = CarParkSlotDump::update(
+                [
+                    'id_slot' => $slot,
+                    'status'  => 'OCCUPIED',
+                    'coordinate' => $coordinate,
+                ]
+            );
+    
+            return $car_park_slot_dump;
+    }
+
+    // update table user_parks
+    private function updateReservationTime($update, $id_reservation)
+    {
+        $reservation_buffer = ReservationBuffer::where('id_reservation', $id_reservation)->firstOrFail();
+
+        $user_park = DB::table('user_parks')->update(
+            array(
+                'id_slot' => $reservation_buffer->id_slot,
+                'arrive_time' => date('Y-m-d').' '.$update['arrive_time'],
+                'leaving_time' => date('Y-m-d').' '.$update['leaving_time'],
+                'price' => $update['price'],
+            )
+        );
+
+        return $user_park;
     }
 }
