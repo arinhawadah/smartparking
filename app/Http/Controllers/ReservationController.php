@@ -135,9 +135,11 @@ class ReservationController extends Controller
         $this->validate($request, $constraints);
 
         $this->updateReservationTime($update, $id_reservation);
+
+        $editreservation = ReservationBuffer::findOrFail($id_reservation);
         
         return fractal()
-        ->item($reservation_buffer)
+        ->item($editreservation)
         ->transformWith(new ReservationTransformer)
         ->toArray();
 

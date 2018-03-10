@@ -21,7 +21,7 @@ class AuthController extends Controller
         $this->validate($request, [
             'name' => 'required',
             'email'=> 'required|email|unique:user_registrations',
-            'password'=>'required|min:6|confirmed',
+            'password'=>'required|min:6',
             'car_type'=>'required',
             'license_plate_number' => 'required|max:10',
         ]);
@@ -62,7 +62,7 @@ class AuthController extends Controller
         $this->validate($request, [
             'name' => 'required',
             'email'=> 'required|email|unique:user_registrations',
-            'password'=>'required|min:6|confirmed',
+            'password'=>'required|min:6',
             'car_type'=>'required',
             'license_plate_number' => 'required|max:10',
         ]);
