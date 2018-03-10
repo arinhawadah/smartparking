@@ -129,7 +129,6 @@ class ReservationController extends Controller
 
         $reservation_buffer = $reservation_buffer->where('id_reservation', $id_reservation)->update([
             'id_slot' => $slot,
-            'validity_limit' => now(),
         ]);
 
         $this->validate($request, $constraints);
@@ -146,19 +145,21 @@ class ReservationController extends Controller
         return response()->json($response, 201);
     }
 
-    // update table car_park_slot_dump
-    private function updateCarParkSlotDumps($slot, $coordinate)
+    // update table car_park_slot_dump gadipake
+    /*private function updateCarParkSlotDumps($slot, $coordinate)
     {
-            $car_park_slot_dump = CarParkSlotDump::update(
+            $car_park_slot_dump = CarParkSlotDump::leftJoin('reservation_buffers', 'car_park_slot_dumps.created_at', '=', 'reservation_buffers.validity_limit')
+            ->whereColumn('car_park_slot_dumps.created_at','reservation_buffers.validity_limit')
+            ->update(
                 [
-                    'id_slot' => $slot,
+                    'car_park_slot_dumps.id_slot' => $slot,
                     'status'  => 'OCCUPIED',
                     'coordinate' => $coordinate,
                 ]
             );
     
             return $car_park_slot_dump;
-    }
+    }*/
 
     // update table user_parks
     private function updateReservationTime($update, $id_reservation)
@@ -175,5 +176,16 @@ class ReservationController extends Controller
         );
 
         return $user_park;
+    }
+
+    // delete reservation
+    public function deleteReservation(Request $request, ReservationBuffer $reservation_buffer, $id_reservation)
+    {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
+        UserPark::where('id_reservation', $id_reservation)->delete();
+        ReservationBuffer::where('id_reservation', $id_reservation)->delete();
+
+        return response()->json('Delete Succes');
     }
 }
