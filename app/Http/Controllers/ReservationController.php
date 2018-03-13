@@ -186,6 +186,6 @@ class ReservationController extends Controller
         UserPark::where('id_reservation', $id_reservation)->delete();
         ReservationBuffer::where('id_reservation', $id_reservation)->delete();
 
-        return response()->json('Delete Succes');
+        return response()->json('Delete Success');
     }
 }

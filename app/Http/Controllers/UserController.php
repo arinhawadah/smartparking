@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\UserPark;
+use App\ReservationBuffer;
 use Illuminate\Http\Request;
 use App\Transformers\UserCredentialTransformer;
 use Auth;
+use DB;
 
 class UserController extends Controller
 {
@@ -59,5 +62,17 @@ class UserController extends Controller
         ->item($edituser)
         ->transformWith(new UserCredentialTransformer)
         ->toArray();
+    }
+
+    public function deleteUser(Request $request, User $user, $id_user)
+    {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
+        DB::table('role_user')->where('user_id_user', $id_user)->delete();
+        UserPark::where('id_user', $id_user)->delete();
+        ReservationBuffer::where('id_user', $id_user)->delete();
+        User::where('id_user', $id_user)->delete();
+
+        return response()->json('Delete User Success');
     }
 }

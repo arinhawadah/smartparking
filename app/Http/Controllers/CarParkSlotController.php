@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\CarParkSlot;
 use App\CarParkSlotDump;
+use App\UserPark;
 use App\Transformers\CarParkSlotTransformer;
+use App\Transformers\UserParkTransformer;
 
 class CarParkSlotController extends Controller
 {
@@ -16,6 +18,21 @@ class CarParkSlotController extends Controller
         return fractal()
         ->collection($car_park_slot)
         ->transformWith(new CarParkSlotTransformer)
+        ->toArray();
+
+        return response()->json($response, 201);
+    }
+
+    public function statusByTime(UserPark $user_park, $arrive_time, $leaving_time)
+    {
+        $user_park = $user_park
+        ->whereBetween('arrive_time', [date('Y-m-d').' '.$arrive_time, date('Y-m-d').' '.$leaving_time])
+        ->whereBetween('leaving_time',[date('Y-m-d').' '.$arrive_time, date('Y-m-d').' '.$leaving_time])
+        ->get();
+
+        return fractal()
+        ->collection($user_park)
+        ->transformWith(new UserParkTransformer)
         ->toArray();
 
         return response()->json($response, 201);
@@ -108,7 +125,7 @@ class CarParkSlotController extends Controller
         CarParkSlotDump::where('coordinate', $coordinate)->delete();
         CarParkSlot::where('coordinate', $coordinate)->delete();
 
-        return response()->json('Delete Succes');
+        return response()->json('Delete Success');
     }
 
 }
