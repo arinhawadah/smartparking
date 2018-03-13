@@ -23,10 +23,13 @@ Route::post('auth/login','AuthController@login');
 Route::get('users/profile','UserController@profile')->middleware('auth.basic');
 Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
 Route::get('users','UserController@users')->middleware('auth:api');
-Route::post('reservation','ReservationController@addReservation')->middleware('auth:api');
+Route::post('addreservation','ReservationController@addReservation')->middleware('auth:api');
 Route::get('carparkslot','CarParkSlotController@status');
 
 //admin
 Route::post('auth/admin/register', 'AuthController@registerAdmin');
 Route::put('admin/updatereserevation/{id_reservation}','ReservationController@updateReservation')->middleware('auth.basic');
 Route::delete('admin/deletereserevation/{id_reservation}','ReservationController@deleteReservation')->middleware('auth.basic');
+Route::post('admin/addslot', 'CarParkSlotController@createParkSlot')->middleware('auth.basic');
+Route::put('admin/updateslot/{coordinate}', 'CarParkSlotController@updateParkSlot')->middleware('auth.basic');
+Route::delete('admin/deleteslot/{coordinate}','CarParkSlotController@deleteParkSlot')->middleware('auth.basic');
