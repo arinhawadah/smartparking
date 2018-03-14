@@ -35,3 +35,5 @@ Route::post('admin/addslot', 'CarParkSlotController@createParkSlot')->middleware
 Route::put('admin/updateslot/{coordinate}', 'CarParkSlotController@updateParkSlot')->middleware('auth.basic');
 Route::delete('admin/deleteslot/{coordinate}','CarParkSlotController@deleteParkSlot')->middleware('auth.basic');
 Route::delete('admin/deleteuser/{id_user}','UserController@deleteUser')->middleware('auth.basic');
+Route::get('admin/showuserid/{id_user}','UserController@showUserbyId')->middleware('auth.basic');
+Route::get('admin/showuseremail/{email}','UserController@showUserbyEmail')->middleware('auth.basic');

@@ -75,4 +75,32 @@ class UserController extends Controller
 
         return response()->json('Delete User Success');
     }
+
+    //search user by id
+    public function showUserbyId(Request $request, User $user, $id_user)
+    {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
+        $user = User::findOrFail($id_user);
+
+        return fractal()
+        ->item($user)
+        ->transformWith(new UserCredentialTransformer)
+        ->toArray();
+    }
+
+    //search user by email
+    public function showUserbyEmail(Request $request, User $user, $email)
+    {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
+        $user = $user
+        ->where('email', $email)
+        ->first();
+
+        return fractal()
+        ->item($user)
+        ->transformWith(new UserCredentialTransformer)
+        ->toArray();
+    }
 }

@@ -13,7 +13,7 @@ class User extends Authenticatable
     * @var array
     */
     protected $guarded = ['remember_token'];
-    
+
     protected $table = 'user_credentials';
 
         /**
