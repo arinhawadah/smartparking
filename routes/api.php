@@ -39,4 +39,4 @@ Route::get('admin/showuseremail/{email}','UserController@showUserbyEmail')->midd
 Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@statusByTime');
 
 // sensor
-Route::post('parksensor/add','ParkSensorController@createSensor');
+Route::post('parksensor/add','ParkSensorController@addSensor');

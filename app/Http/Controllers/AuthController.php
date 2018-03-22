@@ -46,15 +46,17 @@ class AuthController extends Controller
         // $message->from('spark@mail.com','SparkEmail');
         // });
 
-        return fractal()
-        ->item($user_registration)
-        ->transformWith(new UserTransformer)
-        ->addMeta([
-            'activation token' => $user_registration->activation_token,
-        ])
-        ->toArray();
+        // return fractal()
+        // ->item($user_registration)
+        // ->transformWith(new UserTransformer)
+        // ->addMeta([
+        //     'activation token' => $user_registration->activation_token,
+        // ])
+        // ->toArray();
 
-        return response()->json($response, 201);
+        // return response()->json($response, 201);
+
+        return response()->json('Register Success');
     }
 
     public function registerAdmin(Request $request, User $user)

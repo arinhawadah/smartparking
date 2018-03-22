@@ -9,7 +9,7 @@ use App\Transformers\ParkSensorTransformer;
 class ParkSensorController extends Controller
 {
     // buat create tabel sensor->update table car_park_slot dan create car_park_slot_dumps
-    public function createSensor(Request $request, ParkSensor $park_sensor)
+    public function addSensor(Request $request, ParkSensor $park_sensor)
     {
         $this->validate($request, [
             'id_sensor' => 'required',

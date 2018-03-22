@@ -44,6 +44,12 @@ class ReservationController extends Controller
 
         $this->createReservationTime($input);
 
+        $check_sensor = CarParkSlot::where('coordinate', $coordinate)->select('id_sensor')->first();
+
+        if($check_sensor['id_sensor'] == null){
+            return response()->json('Your slot have not registered yet');
+        }
+
         return fractal()
         ->item($reservation_buffer)
         ->transformWith(new ReservationTransformer)
@@ -55,7 +61,7 @@ class ReservationController extends Controller
     // update status car_park_slot
     private function updateStatus($coordinate)
     {
-        $car_park_slot = CarParkSlot::updateOrCreate(
+        $car_park_slot = CarParkSlot::UpdateOrCreate(
             ['coordinate' =>$coordinate],
             ['status' => 'OCCUPIED']
         );

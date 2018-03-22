@@ -45,11 +45,13 @@ class CarParkSlotController extends Controller
         $this->validate($request, [
             'status' => 'required',
             'coordinate' => 'required|unique:car_park_slots',
+            'id_sensor' => 'required'
         ]);
 
         $car_park_slot = $car_park_slot->create([
           'status' => $request->status,
-          'coordinate' => $request->coordinate
+          'coordinate' => $request->coordinate,
+          'id_sensor' => $request->id_sensor
         ]);
 
         $coordinate = $request->coordinate;
@@ -75,6 +77,7 @@ class CarParkSlotController extends Controller
         $car_park_slot_dump = CarParkSlotDump::create(
             [
                 'id_slot' => $slot,
+                'id_sensor' => $input['id_sensor'],
                 'status'  => $input['status'],
                 'coordinate' => $coordinate,
             ]
@@ -92,10 +95,12 @@ class CarParkSlotController extends Controller
         
         $constraints = [
             'status' => 'required',
+            'id_sensor' => 'required',
             ];
 
         $input = [
             'status' => $request['status'],
+            'id_sensor' => $request['id_sensor'],
         ];
 
         $slot = CarParkSlot::where('coordinate', $coordinate)
