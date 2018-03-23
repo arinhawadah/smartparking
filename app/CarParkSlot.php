@@ -11,6 +11,6 @@ class CarParkSlot extends Model
     public $timestamps = false;
 
     protected $fillable =[
-        'id_slot', 'status', 'coordinate'
+        'id_slot', 'status', 'slot_name', 'id_sensor',
     ];
 }

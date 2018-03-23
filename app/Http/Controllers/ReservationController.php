@@ -7,6 +7,7 @@ use App\ReservationBuffer;
 use App\CarParkSlot;
 use App\CarParkSlotDump;
 use App\UserPark;
+use App\ParkSensor;
 use Auth;
 use DB;
 use App\Transformers\ReservationTransformer;
@@ -16,35 +17,37 @@ class ReservationController extends Controller
     public function addReservation(Request $request, ReservationBuffer $reservation_buffer)
     {
         $this->validate($request,[
-            'coordinate' => 'required',
+            'slot_name' => 'required',
             'arrive_time' => 'required',
             'leaving_time' => 'required',
             'price' => 'required'
         ]);
 
-        // update status car_park_slot and update reservation time input coordinate, input reservation time
-        $coordinate = $request->coordinate;
+        // update status car_park_slot and update reservation time input slot_name, input reservation time
+        $slot_name = $request->slot_name;
         // $arrivetime = $request->arrive_time;
         // $leavingtime = $request->leaving_time;
         // $price = $request->price;
-        $input = $request->except('coordinate');
-        $this->updateStatus($coordinate);
+        $input = $request->except('slot_name');
+        $this->updateStatus($slot_name);
 
-        $slot = CarParkSlot::where('coordinate', $coordinate)
-        ->pluck('id_slot')
+        $slot = CarParkSlot::where('slot_name', $slot_name)
         ->first();
 
-        $this->createCarParkSlotDumps($slot, $coordinate);
+        $old_slot = null;
+        $this->updateSensor($slot, $old_slot);
+
+        $this->createCarParkSlotDumps($slot, $slot_name);
 
         $reservation_buffer = $reservation_buffer->create([
             'id_user' => Auth::user()->id_user,
-            'id_slot' => $slot,
+            'id_slot' => $slot['id_slot'],
             'validity_limit' => now(),
         ]);
 
         $this->createReservationTime($input);
 
-        $check_sensor = CarParkSlot::where('coordinate', $coordinate)->select('id_sensor')->first();
+        $check_sensor = CarParkSlot::where('slot_name', $slot_name)->select('id_sensor')->first();
 
         if($check_sensor['id_sensor'] == null){
             return response()->json('Your slot have not registered yet');
@@ -59,14 +62,28 @@ class ReservationController extends Controller
     }
 
     // update status car_park_slot
-    private function updateStatus($coordinate)
+    private function updateStatus($slot_name)
     {
         $car_park_slot = CarParkSlot::UpdateOrCreate(
-            ['coordinate' =>$coordinate],
+            ['slot_name' =>$slot_name],
             ['status' => 'OCCUPIED']
         );
 
         return $car_park_slot;
+    }
+
+    // update status park_sensor
+    private function updateSensor($slot, $old_slot)
+    {
+        $park_sensor = ParkSensor::where('id_sensor',$old_slot['id_sensor'])->update(
+            ['status' => 1]
+        );
+
+        $park_sensor = ParkSensor::where('id_sensor',$slot['id_sensor'])->update(
+            ['status' => 2]
+        );
+
+        return $park_sensor;
     }
 
     // create table user_parks
@@ -90,13 +107,14 @@ class ReservationController extends Controller
     }
 
     // create table car_park_slot_dump
-    private function createCarParkSlotDumps($slot, $coordinate)
+    private function createCarParkSlotDumps($slot, $slot_name)
     {
         $car_park_slot_dump = CarParkSlotDump::create(
             [
-                'id_slot' => $slot,
+                'id_slot' => $slot['id_slot'],
+                'id_sensor' => $slot['id_sensor'],
                 'status'  => 'OCCUPIED',
-                'coordinate' => $coordinate,
+                'slot_name' => $slot_name,
             ]
         );
 
@@ -109,32 +127,40 @@ class ReservationController extends Controller
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
         $reservation_buffer = ReservationBuffer::findOrFail($id_reservation);
+
         $constraints = [
-            'coordinate' => 'required',
+            'slot_name' => 'required',
             'arrive_time' => 'required',
             'leaving_time' => 'required',
             'price' => 'required'
             ];
 
         $input = [
-            'coordinate' => $request['coordinate'],
+            'slot_name' => $request['slot_name'],
             'arrive_time' => $request['arrive_time'],
             'leaving_time' => $request['leaving_time'],
             'price' => $request['price'],
         ];
 
-        $coordinate = $request->coordinate;
-        $update = $request->except('coordinate');
-        $this->updateStatus($coordinate);
+        $slot_name = $request->slot_name;
+        $update = $request->except('slot_name');
+        
+        $old_slot_status = CarParkSlot::where('id_slot',$reservation_buffer['id_slot'])
+        ->update(['status'=>'AVAILABLE']);
 
-        $slot = CarParkSlot::where('coordinate', $coordinate)
-        ->pluck('id_slot')
+        $this->updateStatus($slot_name);
+        
+        $old_slot = CarParkSlot::where('id_slot',$reservation_buffer['id_slot'])->first();
+
+        $slot = CarParkSlot::where('slot_name', $slot_name)
         ->first();
 
-        $this->createCarParkSlotDumps($slot, $coordinate);
+        $this->updateSensor($slot, $old_slot);
+
+        $this->createCarParkSlotDumps($slot, $slot_name);
 
         $reservation_buffer = $reservation_buffer->where('id_reservation', $id_reservation)->update([
-            'id_slot' => $slot,
+            'id_slot' => $slot['id_slot'],
         ]);
 
         $this->validate($request, $constraints);
@@ -152,7 +178,7 @@ class ReservationController extends Controller
     }
 
     // update table car_park_slot_dump gadipake
-    /*private function updateCarParkSlotDumps($slot, $coordinate)
+    /*private function updateCarParkSlotDumps($slot, $slot_name)
     {
             $car_park_slot_dump = CarParkSlotDump::leftJoin('reservation_buffers', 'car_park_slot_dumps.created_at', '=', 'reservation_buffers.validity_limit')
             ->whereColumn('car_park_slot_dumps.created_at','reservation_buffers.validity_limit')
@@ -160,7 +186,7 @@ class ReservationController extends Controller
                 [
                     'car_park_slot_dumps.id_slot' => $slot,
                     'status'  => 'OCCUPIED',
-                    'coordinate' => $coordinate,
+                    'slot_name' => $slot_name,
                 ]
             );
     

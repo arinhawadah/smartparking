@@ -12,7 +12,7 @@ class CarParkSlotTransformer extends TransformerAbstract
         return[
             'id_slot' => $car_park_slot->id_slot,
             'status' => $car_park_slot->status,
-            'coordinate'=>$car_park_slot->coordinate,
+            'slot_name'=>$car_park_slot->slot_name,
         ];
     } 
     

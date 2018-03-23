@@ -14,7 +14,7 @@ class UserParkTransformer extends TransformerAbstract
 
         return[
             'id_slot' => $user_park->id_slot,
-            'coordinate' => $car_park_slot->coordinate,
+            'slot_name' => $car_park_slot->slot_name,
         ];
     } 
     
