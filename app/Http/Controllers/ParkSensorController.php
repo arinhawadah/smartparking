@@ -11,16 +11,16 @@ use App\Transformers\ParkSensorTransformer;
 class ParkSensorController extends Controller
 {
     // add new sensor or update sensor status
-    public function addSensor(Request $request, ParkSensor $park_sensor)
+    public function addSensor(Request $request, ParkSensor $park_sensor, $id_sensor, $status)
     {
-        $this->validate($request, [
-            'id_sensor' => 'required|unique',
-            'status'=> 'required',
-        ]);
+        // $this->validate($request, [
+        //     'id_sensor' => 'required|unique:park_sensors',
+        //     'status'=> 'required',
+        // ]);
     
         $park_sensor = $park_sensor->UpdateOrCreate(
-            ['id_sensor' => $request->id_sensor],
-            ['status' => $request->status,
+            ['id_sensor' => $id_sensor],
+            ['status' => $status,
             'time' => now()]
         );
 
@@ -58,16 +58,27 @@ class ParkSensorController extends Controller
     // create table car_park_slot_dump
     private function createCarParkSlotDumps($slot)
     {
-        $car_park_slot_dump = CarParkSlotDump::create(
-            [
-                'id_slot' => $slot['id_slot'],
-                'id_sensor' => $slot['id_sensor'],
-                'status'  => $slot['status'],
-                'slot_name' => $slot['slot_name'],
-            ]
-        );
+        if($slot['id_slot'] != null){
+            $car_park_slot_dump = CarParkSlotDump::create(
+                [
+                    'id_slot' => $slot['id_slot'],
+                    'id_sensor' => $slot['id_sensor'],
+                    'status'  => $slot['status'],
+                    'slot_name' => $slot['slot_name'],
+                ]
+            );
+        }
 
-        return $car_park_slot_dump;
+        return;
+    }
+
+    // delete park_sensor
+    public function deleteParkSensor(Request $request, $id_sensor)
+    {
+        CarParkSlotDump::where('id_sensor', $id_sensor)->delete();
+        ParkSensor::where('id_sensor', $id_sensor)->delete();
+
+        return response()->json('Delete Success');
     }
 
 }
