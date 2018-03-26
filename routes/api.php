@@ -25,6 +25,7 @@ Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
 Route::get('users','UserController@users')->middleware('auth:api');
 Route::post('addreservation','ReservationController@addReservation')->middleware('auth:api');
 Route::get('carparkslot','CarParkSlotController@status');
+Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@statusAvailableSlot');
 
 //admin
 Route::post('auth/admin/register', 'AuthController@registerAdmin');
@@ -36,7 +37,7 @@ Route::delete('admin/deleteslot/{slot_name}','CarParkSlotController@deleteParkSl
 Route::delete('admin/deleteuser/{id_user}','UserController@deleteUser')->middleware('auth.basic');
 Route::get('admin/showuserid/{id_user}','UserController@showUserbyId')->middleware('auth.basic');
 Route::get('admin/showuseremail/{email}','UserController@showUserbyEmail')->middleware('auth.basic');
-Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@statusByTime');
+Route::get('admin/carparkslot/{time}','CarParkSlotController@statusByTime');
 
 // sensor
 Route::post('parksensor/add','ParkSensorController@addSensor');

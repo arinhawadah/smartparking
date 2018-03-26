@@ -10,11 +10,11 @@ use App\Transformers\ParkSensorTransformer;
 
 class ParkSensorController extends Controller
 {
-    // buat create tabel sensor->update table car_park_slot dan create car_park_slot_dumps
+    // add new sensor or update sensor status
     public function addSensor(Request $request, ParkSensor $park_sensor)
     {
         $this->validate($request, [
-            'id_sensor' => 'required',
+            'id_sensor' => 'required|unique',
             'status'=> 'required',
         ]);
     
@@ -24,7 +24,7 @@ class ParkSensorController extends Controller
             'time' => now()]
         );
 
-        $this->updateStatus($park_sensor);
+        $this->updateStatus($park_sensor); // update status car_park_slot
 
         $slot = CarParkSlot::where('id_sensor', $park_sensor['id_sensor'])
         ->first(); 

@@ -11,6 +11,7 @@ use App\Transformers\UserParkTransformer;
 
 class CarParkSlotController extends Controller
 {
+    // get all park slot
     public function status(CarParkSlot $car_park_slot)
     {
         $car_park_slot = $car_park_slot->all();
@@ -23,11 +24,15 @@ class CarParkSlotController extends Controller
         return response()->json($response, 201);
     }
 
-    public function statusByTime(UserPark $user_park, $arrive_time, $leaving_time)
+    // get first available slot
+    public function statusAvailableSlot(UserPark $user_park, $arrive_time, $leaving_time)
     {
         $user_park = $user_park
-        ->whereBetween('arrive_time', [date('Y-m-d').' '.$arrive_time, date('Y-m-d').' '.$leaving_time])
-        ->whereBetween('leaving_time',[date('Y-m-d').' '.$arrive_time, date('Y-m-d').' '.$leaving_time])
+        ->whereDate('arrive_time', date('Y-m-d'))
+        ->whereDate('leaving_time', date('Y-m-d'))
+        ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time, date('Y-m-d').' '.$leaving_time])
+        ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time, date('Y-m-d').' '.$leaving_time])
+        ->take(1)
         ->get();
 
         return fractal()
@@ -38,6 +43,23 @@ class CarParkSlotController extends Controller
         return response()->json($response, 201);
     }
 
+    // get status by time arrive
+    public function statusByTime(UserPark $user_park, $time)
+    {
+        $user_park = $user_park
+        ->whereTime('arrive_time','=', $time)
+        ->orWhereTime('leaving_time','=', $time)
+        ->get();
+
+        return fractal()
+        ->collection($user_park)
+        ->transformWith(new UserParkTransformer)
+        ->toArray();
+
+        return response()->json($response, 201);
+    }
+
+    // create new slot
     public function createParkSlot(Request $request, CarParkSlot $car_park_slot)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
@@ -61,7 +83,8 @@ class CarParkSlotController extends Controller
         ->pluck('id_slot')
         ->first(); 
 
-        $this->createCarParkSlotDumps($slot, $input, $slot_name);
+        
+        $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
 
         return fractal()
         ->item($car_park_slot)
@@ -107,7 +130,7 @@ class CarParkSlotController extends Controller
         ->pluck('id_slot')
         ->first();
 
-        $this->createCarParkSlotDumps($slot, $input, $slot_name);
+        $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
 
         $this->validate($request, $constraints);
 

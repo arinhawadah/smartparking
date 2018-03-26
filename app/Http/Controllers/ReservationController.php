@@ -14,6 +14,7 @@ use App\Transformers\ReservationTransformer;
 
 class ReservationController extends Controller
 {
+    //add new reservation
     public function addReservation(Request $request, ReservationBuffer $reservation_buffer)
     {
         $this->validate($request,[
@@ -23,21 +24,17 @@ class ReservationController extends Controller
             'price' => 'required'
         ]);
 
-        // update status car_park_slot and update reservation time input slot_name, input reservation time
         $slot_name = $request->slot_name;
-        // $arrivetime = $request->arrive_time;
-        // $leavingtime = $request->leaving_time;
-        // $price = $request->price;
         $input = $request->except('slot_name');
-        $this->updateStatus($slot_name);
+        $this->updateStatus($slot_name); // update status car_park_slot
 
         $slot = CarParkSlot::where('slot_name', $slot_name)
         ->first();
 
         $old_slot = null;
-        $this->updateSensor($slot, $old_slot);
+        $this->updateSensor($slot, $old_slot); // update sensor status
 
-        $this->createCarParkSlotDumps($slot, $slot_name);
+        $this->createCarParkSlotDumps($slot, $slot_name); 
 
         $reservation_buffer = $reservation_buffer->create([
             'id_user' => Auth::user()->id_user,
@@ -45,7 +42,7 @@ class ReservationController extends Controller
             'validity_limit' => now(),
         ]);
 
-        $this->createReservationTime($input);
+        $this->createReservationTime($input); // create reservation time, input arrive_time, leaving_time, and price
 
         $check_sensor = CarParkSlot::where('slot_name', $slot_name)->select('id_sensor')->first();
 
@@ -146,16 +143,16 @@ class ReservationController extends Controller
         $update = $request->except('slot_name');
         
         $old_slot_status = CarParkSlot::where('id_slot',$reservation_buffer['id_slot'])
-        ->update(['status'=>'AVAILABLE']);
+        ->update(['status'=>'AVAILABLE']); // update old status car_park_slot before input update
 
-        $this->updateStatus($slot_name);
+        $this->updateStatus($slot_name); // update status car_park_slot
         
         $old_slot = CarParkSlot::where('id_slot',$reservation_buffer['id_slot'])->first();
 
         $slot = CarParkSlot::where('slot_name', $slot_name)
         ->first();
 
-        $this->updateSensor($slot, $old_slot);
+        $this->updateSensor($slot, $old_slot); // update sensor status
 
         $this->createCarParkSlotDumps($slot, $slot_name);
 
@@ -165,7 +162,7 @@ class ReservationController extends Controller
 
         $this->validate($request, $constraints);
 
-        $this->updateReservationTime($update, $id_reservation);
+        $this->updateReservationTime($update, $id_reservation); // update reservation time 
 
         $editreservation = ReservationBuffer::findOrFail($id_reservation);
         

@@ -16,6 +16,7 @@ use Auth;
 
 class AuthController extends Controller
 {
+    // register
     public function register(Request $request, UserRegistration $user_registration)
     {
         $this->validate($request, [
@@ -31,7 +32,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password'=>bcrypt($request->password),
-            'activation_token' => str_random(225),
+            'activation_token' => str_random(25),
             'car_type' => $request->car_type,
             'license_plate_number' => $request->license_plate_number,
         ]);
@@ -59,6 +60,7 @@ class AuthController extends Controller
         return response()->json('Register Success');
     }
 
+    // resgister admin
     public function registerAdmin(Request $request, User $user)
     {
         $this->validate($request, [
@@ -84,17 +86,19 @@ class AuthController extends Controller
         ->attach(Role::where('role_name', 'Admin')
         ->first());
        
-        return fractal()
-        ->item($user)
-        ->transformWith(new UserCredentialTransformer)
-        ->addMeta([
-            'activation token' => $user->activation_token,
-        ])
-        ->toArray();
+        // return fractal()
+        // ->item($user)
+        // ->transformWith(new UserCredentialTransformer)
+        // ->addMeta([
+        //     'activation token' => $user->activation_token,
+        // ])
+        // ->toArray();
 
-        return response()->json($response, 201);
+        // return response()->json($response, 201);
+        return response()->json('Register Success');
     }
 
+    // login
     public function login(Request $request, User $user)
     {
 
