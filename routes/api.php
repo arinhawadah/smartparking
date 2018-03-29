@@ -38,7 +38,8 @@ Route::delete('admin/deleteuser/{id_user}','UserController@deleteUser')->middlew
 Route::get('admin/showuserid/{id_user}','UserController@showUserbyId')->middleware('auth.basic');
 Route::get('admin/showuseremail/{email}','UserController@showUserbyEmail')->middleware('auth.basic');
 Route::get('admin/carparkslot/{time}','CarParkSlotController@statusByTime');
+Route::delete('deletesensor/{id_sensor}','ParkSensorController@deleteParkSensor')->middleware('auth.basic');
 
 // sensor
 Route::get('parksensor/id_sensor={id_sensor}&&status={status}','ParkSensorController@addSensor');
-Route::delete('deletesensor/{id_sensor}','ParkSensorController@deleteParkSensor');
+Route::get('parksensor/id_sensor={id_sensor}','ParkSensorController@getSensorStatus');

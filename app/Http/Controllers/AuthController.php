@@ -63,6 +63,8 @@ class AuthController extends Controller
     // resgister admin
     public function registerAdmin(Request $request, User $user)
     {
+        $request->user()->authorizeRoles(['Super Admin']);
+
         $this->validate($request, [
             'name' => 'required',
             'email'=> 'required|email|unique:user_registrations',
