@@ -7,7 +7,7 @@ use App\CarParkSlot;
 use App\CarParkSlotDump;
 use App\UserPark;
 use App\Transformers\CarParkSlotTransformer;
-use App\Transformers\UserParkTransformer;
+use App\Transformers\AvailableTimeTransformer;
 
 class CarParkSlotController extends Controller
 {
@@ -25,19 +25,33 @@ class CarParkSlotController extends Controller
     }
 
     // get first available slot
-    public function statusAvailableSlot(UserPark $user_park, $arrive_time, $leaving_time)
+    public function statusAvailableSlot(CarParkSlot $car_park_slot, $arrive_time, $leaving_time)
     {
-        $user_park = $user_park
+        $sub_time_1 = strtotime($arrive_time) - 60; // "- 60" means, arrive_time - 1 minutes
+        $arrive_time1 = date('H:i', $sub_time_1);
+        $sub_time_2 = strtotime($leaving_time) - 60;
+        $leaving_time1 = date('H:i', $sub_time_2);
+
+        $sub_time_3 = strtotime($arrive_time) + 60; // "+ 60" means, arrive_time + 1 minutes
+        $arrive_time2 = date('H:i', $sub_time_3);
+        $sub_time_4 = strtotime($leaving_time) + 60;
+        $leaving_time2 = date('H:i', $sub_time_4);
+
+        $car_park_slot = $car_park_slot
+        ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot')
         ->whereDate('arrive_time', date('Y-m-d'))
-        ->whereDate('leaving_time', date('Y-m-d'))
-        ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time, date('Y-m-d').' '.$leaving_time])
-        ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time, date('Y-m-d').' '.$leaving_time])
+        ->whereDate('leaving_time', date('Y-m-d'))       
+        ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
+        ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
+        ->orWhere('status', 'AVAILABLE')
+        ->select('car_park_slots.id_slot','car_park_slots.slot_name')
         ->take(1)
         ->get();
+        // dd($user_park);
 
         return fractal()
-        ->collection($user_park)
-        ->transformWith(new UserParkTransformer)
+        ->collection($car_park_slot)
+        ->transformWith(new AvailableTimeTransformer)
         ->toArray();
 
         return response()->json($response, 201);
