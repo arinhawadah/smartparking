@@ -13,6 +13,8 @@ use App\Transformers\UserTransformer;
 use App\Transformers\UserCredentialTransformer;
 use Mail;
 use Auth;
+use JWTAuth;
+use JWTAuthException;
 
 class AuthController extends Controller
 {
@@ -103,7 +105,6 @@ class AuthController extends Controller
     // login
     public function login(Request $request, User $user)
     {
-
         $this->validate($request, [
             'email' => [
                 'required','string',
@@ -115,10 +116,18 @@ class AuthController extends Controller
             return response()->json(['error'=>'Your credential is wrong',401]);
         }
 
-        // if (Auth::attempt(array('email' => $request->email, 'password' => $request->password), true))
-        // {
-        //     // The user is being remembered...
-        // }
+        $token = null;
+            try{
+                if(!$token = JWTAuth::attempt(['email'=>$request->email,'password'=>$request->password])) {
+                    return response()->json([
+                        'msg' => 'Email or Password are incorrect',
+                    ], 404);
+                } 
+            } catch (JWTAuthException $e) {
+                return response()->json([
+                    'msg' => 'failed_to_create_token',
+                ], 404);
+            }
 
         $user = $user->find(Auth::user()->id_user);
 
@@ -126,7 +135,8 @@ class AuthController extends Controller
         ->item($user)
         ->transformWith(new UserCredentialTransformer)
         ->addMeta([
-            'activation token' => $user->activation_token,
+            // 'token' => $user->activation_token,
+            'token' => $token,
         ])
         ->toArray();
     }

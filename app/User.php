@@ -16,13 +16,15 @@ class User extends Authenticatable
 
     protected $table = 'user_credentials';
 
+    protected $primaryKey = 'id_user';
+
         /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'unique_id','name', 'email', 'password', 'car_type','license_plate_number','activation_token'
+        'unique_id','name', 'email', 'password', 'car_type','license_plate_number','activation_token','token'
     ];
 
     /**
@@ -33,8 +35,6 @@ class User extends Authenticatable
     protected $hidden = [
         'password','activation_token','remember_token'
     ];
-
-    protected $primaryKey = 'id_user';
 
     public function roles()
     {

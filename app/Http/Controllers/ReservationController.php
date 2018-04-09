@@ -9,11 +9,17 @@ use App\CarParkSlotDump;
 use App\UserPark;
 use App\ParkSensor;
 use Auth;
+use JWTAuth;
 use DB;
 use App\Transformers\ReservationTransformer;
 
 class ReservationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth', ['only' => ['addReservation']]);
+    }
+
     //add new reservation
     public function addReservation(Request $request, ReservationBuffer $reservation_buffer)
     {
@@ -37,7 +43,7 @@ class ReservationController extends Controller
         $this->createCarParkSlotDumps($slot); 
 
         $reservation_buffer = $reservation_buffer->create([
-            'id_user' => Auth::user()->id_user,
+            'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
             'id_slot' => $id_slot,
             'validity_limit' => now(),
         ]);
@@ -86,11 +92,11 @@ class ReservationController extends Controller
     // create table user_parks
     private function createReservationTime($input)
     {
-        $reservation_buffer = ReservationBuffer::where('id_user', Auth::user()->id_user)->where('validity_limit', now())->firstOrFail();
+        $reservation_buffer = ReservationBuffer::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->where('validity_limit', now())->firstOrFail();
 
         $user_park = DB::table('user_parks')->insert(
             array(
-                'id_user' => Auth::user()->id_user,
+                'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
                 'id_slot' => $reservation_buffer->id_slot,
                 'unique_id' => Auth::user()->unique_id, 
                 'arrive_time' => date('Y-m-d').' '.$input['arrive_time'],

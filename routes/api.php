@@ -20,10 +20,10 @@ use Illuminate\Http\Request;
 //user
 Route::post('auth/user/register','AuthController@register');
 Route::post('auth/login','AuthController@login');
-Route::get('users/profile','UserController@profile')->middleware('auth.basic');
+Route::get('users/profile','UserController@profile')->middleware('cors');
 Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
-Route::get('users','UserController@users')->middleware('auth:api');
-Route::post('addreservation','ReservationController@addReservation')->middleware('auth:api');
+Route::get('users','UserController@users')->middleware('auth.basic');
+Route::post('addreservation','ReservationController@addReservation')->middleware('cors');
 Route::get('carparkslot','CarParkSlotController@status');
 Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@statusAvailableSlot');
 

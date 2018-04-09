@@ -8,10 +8,17 @@ use App\ReservationBuffer;
 use Illuminate\Http\Request;
 use App\Transformers\UserCredentialTransformer;
 use Auth;
+use JWTAuth;
+use JWTAuthException;
 use DB;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth', ['only' => ['profile']]);
+    }
+
     public function users(Request $request, User $user)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
@@ -26,7 +33,8 @@ class UserController extends Controller
 
     public function profile(User $user)
     {
-        $user = $user->find(Auth::user()->id_user);
+        // $user = $user->find(Auth::user()->id_user);
+        $user = $user->find(JWTAuth::parseToken()->authenticate()->id_user);
 
         return fractal()
         ->item($user)
