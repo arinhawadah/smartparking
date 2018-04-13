@@ -29,8 +29,8 @@ Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@sta
 
 //admin
 Route::post('auth/admin/register', 'AuthController@registerAdmin')->middleware('auth.basic');
-Route::put('admin/updatereserevation/{id_reservation}','ReservationController@updateReservation')->middleware('auth.basic');
-Route::delete('admin/deletereserevation/{id_reservation}','ReservationController@deleteReservation')->middleware('auth.basic');
+Route::put('admin/updatereserevation/{id_user_park}','ReservationController@updateReservation')->middleware('auth.basic');
+Route::delete('admin/deletereserevation/{id_user_park}','ReservationController@deleteReservation')->middleware('auth.basic');
 Route::post('admin/addslot', 'CarParkSlotController@createParkSlot')->middleware('auth.basic');
 Route::put('admin/updateslot/{slot_name}', 'CarParkSlotController@updateParkSlot')->middleware('auth.basic');
 Route::delete('admin/deleteslot/{slot_name}','CarParkSlotController@deleteParkSlot')->middleware('auth.basic');

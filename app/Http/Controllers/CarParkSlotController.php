@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use App\CarParkSlot;
 use App\CarParkSlotDump;
 use App\UserPark;
+use App\ParkSensor;
 use App\Transformers\CarParkSlotTransformer;
+use App\Transformers\UserParkTimeTransformer;
 use App\Transformers\AvailableTimeTransformer;
 
 class CarParkSlotController extends Controller
@@ -67,7 +69,7 @@ class CarParkSlotController extends Controller
 
         return fractal()
         ->collection($user_park)
-        ->transformWith(new UserParkTransformer)
+        ->transformWith(new UserParkTimeTransformer)
         ->toArray();
 
         return response()->json($response, 201);
@@ -97,6 +99,7 @@ class CarParkSlotController extends Controller
         ->pluck('id_slot')
         ->first(); 
 
+        $this->updateSensor($input);
         
         $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
 
@@ -123,12 +126,29 @@ class CarParkSlotController extends Controller
         return $car_park_slot_dump;
     }
 
+    // update status park_sensor
+    private function updateSensor($input)
+    {
+        if($input['status'] == 'AVAILABLE'){
+            $park_sensor = ParkSensor::where('id_sensor',$input['id_sensor'])->update(
+                ['status' => 1]
+            );
+        }
+        else{
+            $park_sensor = ParkSensor::where('id_sensor',$input['id_sensor'])->update(
+                ['status' => 2]
+            );
+        }
+
+        return;
+    }
+
     // update status car_park_slot
-    public function updateParkSlot(Request $request, CarParkSlot $car_park_slot, $slot_name)
+    public function updateParkSlot(Request $request, CarParkSlot $car_park_slot, $id_slot)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        $car_park_slot = CarParkSlot::where($slot_name);
+        $car_park_slot = CarParkSlot::where($id_slot);
         
         $constraints = [
             'status' => 'required',
@@ -140,16 +160,19 @@ class CarParkSlotController extends Controller
             'id_sensor' => $request['id_sensor'],
         ];
 
-        $slot = CarParkSlot::where('slot_name', $slot_name)
-        ->pluck('id_slot')
+        $slot = $id_slot;
+        $slot_name = CarParkSlot::where('id_slot', $id_slot)
+        ->pluck('slot_name')
         ->first();
 
         $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
 
         $this->validate($request, $constraints);
 
-        CarParkSlot::where('slot_name', $slot_name)->update($input);
-        $editslot = CarParkSlot::findOrFail($slot);
+        CarParkSlot::where('id_slot', $id_slot)->update($input);
+        $this->updateSensor($input);
+
+        $editslot = CarParkSlot::findOrFail($id_slot);
 
         return fractal()
         ->item($editslot)
@@ -160,12 +183,12 @@ class CarParkSlotController extends Controller
     }
 
     // delete car_park_slot
-    public function deleteParkSlot(Request $request, $slot_name)
+    public function deleteParkSlot(Request $request, $id_slot)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        CarParkSlotDump::where('slot_name', $slot_name)->delete();
-        CarParkSlot::where('slot_name', $slot_name)->delete();
+        CarParkSlotDump::where('id_slot', $id_slot)->delete();
+        CarParkSlot::where('id_slot', $id_slot)->delete();
 
         return response()->json('Delete Success');
     }

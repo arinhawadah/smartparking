@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\ReservationBuffer;
 use App\CarParkSlot;
 use App\CarParkSlotDump;
 use App\UserPark;
@@ -21,7 +20,7 @@ class ReservationController extends Controller
     }
 
     //add new reservation
-    public function addReservation(Request $request, ReservationBuffer $reservation_buffer)
+    public function addReservation(Request $request, UserPark $user_park)
     {
         $this->validate($request,[
             'id_slot' => 'required',
@@ -41,11 +40,14 @@ class ReservationController extends Controller
         $this->updateSensor($slot, $old_slot); // update sensor status
 
         $this->createCarParkSlotDumps($slot); 
-
-        $reservation_buffer = $reservation_buffer->create([
+            
+        $user_park = $user_park->create([
             'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
             'id_slot' => $id_slot,
-            'validity_limit' => now(),
+            'unique_id' => Auth::user()->unique_id, 
+            'arrive_time' => date('Y-m-d').' '.$request->arrive_time,
+            'leaving_time' => date('Y-m-d').' '.$request->leaving_time,
+            'price' => $request->price,
         ]);
 
         $check_sensor = CarParkSlot::where('id_slot', $id_slot)->select('id_sensor')->first();
@@ -54,10 +56,10 @@ class ReservationController extends Controller
             return response()->json('Your slot have not registered yet');
         }
 
-        $this->createReservationTime($input); // create reservation time, input arrive_time, leaving_time, and price
+        // $this->createReservationTime($input); // create reservation time, input arrive_time, leaving_time, and price
 
         return fractal()
-        ->item($reservation_buffer)
+        ->item($user_park)
         ->transformWith(new ReservationTransformer)
         ->toArray();
 
@@ -90,24 +92,24 @@ class ReservationController extends Controller
     }
 
     // create table user_parks
-    private function createReservationTime($input)
-    {
-        $reservation_buffer = ReservationBuffer::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->where('validity_limit', now())->firstOrFail();
+    // private function createReservationTime($input)
+    // {
+    //     $reservation_buffer = ReservationBuffer::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->where('validity_limit', now())->firstOrFail();
 
-        $user_park = DB::table('user_parks')->insert(
-            array(
-                'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
-                'id_slot' => $reservation_buffer->id_slot,
-                'unique_id' => Auth::user()->unique_id, 
-                'arrive_time' => date('Y-m-d').' '.$input['arrive_time'],
-                'leaving_time' => date('Y-m-d').' '.$input['leaving_time'],
-                'price' => $input['price'],
-                'id_reservation'=> $reservation_buffer->id_reservation,
-            )
-        );
+    //     $user_park = DB::table('user_parks')->insert(
+    //         array(
+    //             'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
+    //             'id_slot' => $reservation_buffer->id_slot,
+    //             'unique_id' => Auth::user()->unique_id, 
+    //             'arrive_time' => date('Y-m-d').' '.$input['arrive_time'],
+    //             'leaving_time' => date('Y-m-d').' '.$input['leaving_time'],
+    //             'price' => $input['price'],
+    //             'id_reservation'=> $reservation_buffer->id_reservation,
+    //         )
+    //     );
 
-        return $user_park;
-    }
+    //     return $user_park;
+    // }
 
     // create table car_park_slot_dump
     private function createCarParkSlotDumps($slot)
@@ -125,52 +127,61 @@ class ReservationController extends Controller
     }
 
     // update reservation
-    public function updateReservation(Request $request, ReservationBuffer $reservation_buffer, $id_reservation)
+    public function updateReservation(Request $request, UserPark $user_park, $id_user_park)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        $reservation_buffer = ReservationBuffer::findOrFail($id_reservation);
+        $user_park = UserPark::findOrFail($id_user_park);
 
         $constraints = [
-            'slot_name' => 'required',
+            'id_slot' => 'required',
             'arrive_time' => 'required',
             'leaving_time' => 'required',
             'price' => 'required'
             ];
 
         $input = [
-            'slot_name' => $request['slot_name'],
+            'id_slot' => $request['id_slot'],
             'arrive_time' => $request['arrive_time'],
             'leaving_time' => $request['leaving_time'],
             'price' => $request['price'],
         ];
 
-        $slot_name = $request->slot_name;
-        $update = $request->except('slot_name');
+        $id_slot = $request->id_slot;
+        $update = $request->except('id_slot');
         
-        $old_slot_status = CarParkSlot::where('id_slot',$reservation_buffer['id_slot'])
+        $old_slot_status = CarParkSlot::where('id_slot',$user_park['id_slot'])
         ->update(['status'=>'AVAILABLE']); // update old status car_park_slot before input update
-
-        $this->updateStatus($slot_name); // update status car_park_slot
         
-        $old_slot = CarParkSlot::where('id_slot',$reservation_buffer['id_slot'])->first();
+        $this->updateStatus($id_slot); // update status car_park_slot
+        
+        $old_slot = CarParkSlot::where('id_slot',$user_park['id_slot'])->first();
 
-        $slot = CarParkSlot::where('slot_name', $slot_name)
+        $slot = CarParkSlot::where('id_slot', $id_slot)
         ->first();
 
         $this->updateSensor($slot, $old_slot); // update sensor status
 
-        $this->createCarParkSlotDumps($slot, $slot_name);
+        $this->createCarParkSlotDumps($slot);
 
-        $reservation_buffer = $reservation_buffer->where('id_reservation', $id_reservation)->update([
-            'id_slot' => $slot['id_slot'],
-        ]);
+        // $reservation_buffer = $reservation_buffer->where('id_reservation', $id_reservation)->update([
+        //     'id_slot' => $slot['id_slot'],
+        // ]);
 
         $this->validate($request, $constraints);
 
-        $this->updateReservationTime($update, $id_reservation); // update reservation time 
+        // $this->updateReservationTime($update, $id_reservation); // update reservation time 
+        $user_park = DB::table('user_parks')->where('id_user_park', $id_user_park)
+        ->update(
+            array(
+                'id_slot' => $id_slot,
+                'arrive_time' => date('Y-m-d').' '.$update['arrive_time'],
+                'leaving_time' => date('Y-m-d').' '.$update['leaving_time'],
+                'price' => $update['price'],
+            )
+        );
 
-        $editreservation = ReservationBuffer::findOrFail($id_reservation);
+        $editreservation = UserPark::findOrFail($id_user_park);
         
         return fractal()
         ->item($editreservation)
@@ -179,22 +190,6 @@ class ReservationController extends Controller
 
         return response()->json($response, 201);
     }
-
-    // update table car_park_slot_dump gadipake
-    /*private function updateCarParkSlotDumps($slot, $slot_name)
-    {
-            $car_park_slot_dump = CarParkSlotDump::leftJoin('reservation_buffers', 'car_park_slot_dumps.created_at', '=', 'reservation_buffers.validity_limit')
-            ->whereColumn('car_park_slot_dumps.created_at','reservation_buffers.validity_limit')
-            ->update(
-                [
-                    'car_park_slot_dumps.id_slot' => $slot,
-                    'status'  => 'OCCUPIED',
-                    'slot_name' => $slot_name,
-                ]
-            );
-    
-            return $car_park_slot_dump;
-    }*/
 
     // update table user_parks
     private function updateReservationTime($update, $id_reservation)
@@ -214,12 +209,11 @@ class ReservationController extends Controller
     }
 
     // delete reservation
-    public function deleteReservation(Request $request, ReservationBuffer $reservation_buffer, $id_reservation)
+    public function deleteReservation(Request $request, UserPark $user_park, $id_user_park)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        UserPark::where('id_reservation', $id_reservation)->delete();
-        ReservationBuffer::where('id_reservation', $id_reservation)->delete();
+        UserPark::where('id_user_park', $id_user_park)->delete();
 
         return response()->json('Delete Success');
     }

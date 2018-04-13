@@ -2,23 +2,23 @@
 
 namespace App\Transformers;
 
-use App\ReservationBuffer;
+// use App\ReservationBuffer;
 use App\UserPark;
 use League\Fractal\TransformerAbstract;
 
 class ReservationTransformer extends TransformerAbstract
 {
-    public function transform(ReservationBuffer $reservation_buffer)
+    public function transform(UserPark $user_park)
     {
-        $user_park = UserPark::where('id_reservation', $reservation_buffer->id_reservation)->firstOrFail();
+        // $user_park = UserPark::where('id_reservation', $reservation_buffer->id_reservation)->firstOrFail();
         return[
-            'id_reservation' => $reservation_buffer->id_reservation,
-            'id_slot' => $reservation_buffer->id_slot,
+            // 'id_reservation' => $reservation_buffer->id_reservation,
+            'id_slot' => $user_park->id_slot,
             'arrive_time' => $user_park->arrive_time,
             'leaving_time' => $user_park->leaving_time,
             'price' => $user_park->price,
-            'validity_limit'=>$reservation_buffer->validity_limit->setTimezone("Asia/Jakarta")->format('H:i:s'),
-            'reserved'=> $reservation_buffer->validity_limit->diffForHumans(),
+            // 'validity_limit'=>$reservation_buffer->validity_limit->setTimezone("Asia/Jakarta")->format('H:i:s'),
+            // 'reserved'=> $reservation_buffer->validity_limit->diffForHumans(),
         ];
     } 
     
