@@ -47,9 +47,14 @@ class ParkSensorController extends Controller
                 ['status' => 'AVAILABLE']
               );
         }
+        elseif($park_sensor['status'] == 2){
+            $car_park_slot = CarParkSlot::where('id_sensor',$park_sensor['id_sensor'])->update(
+                ['status' => 'OCCUPIED']
+              );
+        }        
         else{
             $park_sensor = CarParkSlot::where('id_sensor',$park_sensor['id_sensor'])->update(
-                ['status' => 'OCCUPIED']
+                ['status' => 'PARKED']
               );
         }
         return;

@@ -12,7 +12,7 @@ class ReservationTransformer extends TransformerAbstract
     {
         // $user_park = UserPark::where('id_reservation', $reservation_buffer->id_reservation)->firstOrFail();
         return[
-            // 'id_reservation' => $reservation_buffer->id_reservation,
+            'id_user_park' => $user_park->id_user_park,
             'id_slot' => $user_park->id_slot,
             'arrive_time' => $user_park->arrive_time,
             'leaving_time' => $user_park->leaving_time,

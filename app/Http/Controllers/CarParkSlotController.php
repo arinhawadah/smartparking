@@ -10,6 +10,7 @@ use App\ParkSensor;
 use App\Transformers\CarParkSlotTransformer;
 use App\Transformers\UserParkTimeTransformer;
 use App\Transformers\AvailableTimeTransformer;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CarParkSlotController extends Controller
 {
@@ -27,7 +28,7 @@ class CarParkSlotController extends Controller
     }
 
     // get first available slot
-    public function statusAvailableSlot(CarParkSlot $car_park_slot, $arrive_time, $leaving_time)
+    public function statusAvailableSlot(CarParkSlot $car_park_slot, $arrive_time, $leaving_time, UserPark $user_park)
     {
         $sub_time_1 = strtotime($arrive_time) - 60; // "- 60" means, arrive_time - 1 minutes
         $arrive_time1 = date('H:i', $sub_time_1);
@@ -39,24 +40,43 @@ class CarParkSlotController extends Controller
         $sub_time_4 = strtotime($leaving_time) + 60;
         $leaving_time2 = date('H:i', $sub_time_4);
 
-        $car_park_slot = $car_park_slot
-        ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot')
-        ->whereDate('arrive_time', date('Y-m-d'))
-        ->whereDate('leaving_time', date('Y-m-d'))       
-        ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
-        ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
-        ->orWhere('status', 'AVAILABLE')
-        ->select('car_park_slots.id_slot','car_park_slots.slot_name')
-        ->take(1)
-        ->get();
-        // dd($user_park);
+        $day_check = $user_park->whereDate('arrive_time', date('Y-m-d'))->first();
+        // dd($day_check);
+
+        if ($day_check != NULL)
+        {
+            try {
+                $car_park_slot = $car_park_slot
+                ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot')
+                ->whereDate('arrive_time', date('Y-m-d'))
+                ->whereDate('leaving_time', date('Y-m-d'))       
+                ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
+                ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
+                // ->orWhere('status', 'AVAILABLE')
+                ->select('car_park_slots.id_slot','car_park_slots.slot_name')
+                ->orderBy('car_park_slots.id_slot','asc')
+                // ->take(1)
+                ->firstOrFail();
+              } catch (ModelNotFoundException $ex) {
+                return response()->json("Full Booked", 404);
+              }       
+        }
+        else
+        {
+            $car_park_slot = $car_park_slot
+            ->where('status', 'AVAILABLE')
+            ->select('car_park_slots.id_slot','car_park_slots.slot_name')
+            ->orderBy('car_park_slots.id_slot','asc')
+            // ->take(0)
+            ->firstOrFail();
+        }
 
         return fractal()
-        ->collection($car_park_slot)
-        ->transformWith(new AvailableTimeTransformer)
-        ->toArray();
-
-        return response()->json($response, 201);
+                ->item($car_park_slot)
+                ->transformWith(new AvailableTimeTransformer)
+                ->toArray();
+        
+                return response()->json($response, 201);
     }
 
     // get status by time arrive

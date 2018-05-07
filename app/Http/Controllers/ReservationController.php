@@ -30,16 +30,16 @@ class ReservationController extends Controller
         ]);
 
         $id_slot = $request->id_slot;
-        $input = $request->except('id_slot');
-        $this->updateStatus($id_slot); // update status car_park_slot
+        // $input = $request->except('id_slot');
+        // $this->updateStatus($id_slot); // update status car_park_slot
 
-        $slot = CarParkSlot::where('id_slot', $id_slot)
-        ->first();
+        // $slot = CarParkSlot::where('id_slot', $id_slot)
+        // ->first();
 
-        $old_slot = null;
-        $this->updateSensor($slot, $old_slot); // update sensor status
+        // $old_slot = null;
+        // $this->updateSensor($slot, $old_slot); // update sensor status
 
-        $this->createCarParkSlotDumps($slot); 
+        // $this->createCarParkSlotDumps($slot); 
             
         $user_park = $user_park->create([
             'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
@@ -150,19 +150,19 @@ class ReservationController extends Controller
         $id_slot = $request->id_slot;
         $update = $request->except('id_slot');
         
-        $old_slot_status = CarParkSlot::where('id_slot',$user_park['id_slot'])
-        ->update(['status'=>'AVAILABLE']); // update old status car_park_slot before input update
+        // $old_slot_status = CarParkSlot::where('id_slot',$user_park['id_slot'])
+        // ->update(['status'=>'AVAILABLE']); // update old status car_park_slot before input update
         
-        $this->updateStatus($id_slot); // update status car_park_slot
+        // $this->updateStatus($id_slot); // update status car_park_slot
         
-        $old_slot = CarParkSlot::where('id_slot',$user_park['id_slot'])->first();
+        // $old_slot = CarParkSlot::where('id_slot',$user_park['id_slot'])->first();
 
-        $slot = CarParkSlot::where('id_slot', $id_slot)
-        ->first();
+        // $slot = CarParkSlot::where('id_slot', $id_slot)
+        // ->first();
 
-        $this->updateSensor($slot, $old_slot); // update sensor status
+        // $this->updateSensor($slot, $old_slot); // update sensor status
 
-        $this->createCarParkSlotDumps($slot);
+        // $this->createCarParkSlotDumps($slot);
 
         // $reservation_buffer = $reservation_buffer->where('id_reservation', $id_reservation)->update([
         //     'id_slot' => $slot['id_slot'],
