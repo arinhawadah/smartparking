@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\CarParkSlot;
-use App\CarParkSlotDump;
+// use App\CarParkSlotDump;
 use App\UserPark;
 use App\ParkSensor;
 use App\Transformers\CarParkSlotTransformer;
@@ -112,16 +112,16 @@ class CarParkSlotController extends Controller
           'id_sensor' => $request->id_sensor
         ]);
 
-        $slot_name = $request->slot_name;
+        // $slot_name = $request->slot_name;
         $input = $request->all();
 
-        $slot = CarParkSlot::where('slot_name', $input['slot_name'])
-        ->pluck('id_slot')
-        ->first(); 
+        // $slot = CarParkSlot::where('slot_name', $input['slot_name'])
+        // ->pluck('id_slot')
+        // ->first(); 
 
         $this->updateSensor($input);
         
-        $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
+        // $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
 
         return fractal()
         ->item($car_park_slot)
@@ -131,20 +131,20 @@ class CarParkSlotController extends Controller
         return response()->json($response, 201);
     }
 
-    // create table car_park_slot_dump
-    private function createCarParkSlotDumps($slot, $input, $slot_name)
-    {
-        $car_park_slot_dump = CarParkSlotDump::create(
-            [
-                'id_slot' => $slot,
-                'id_sensor' => $input['id_sensor'],
-                'status'  => $input['status'],
-                'slot_name' => $slot_name,
-            ]
-        );
+    // // create table car_park_slot_dump
+    // private function createCarParkSlotDumps($slot, $input, $slot_name)
+    // {
+    //     $car_park_slot_dump = CarParkSlotDump::create(
+    //         [
+    //             'id_slot' => $slot,
+    //             'id_sensor' => $input['id_sensor'],
+    //             'status'  => $input['status'],
+    //             'slot_name' => $slot_name,
+    //         ]
+    //     );
 
-        return $car_park_slot_dump;
-    }
+    //     return $car_park_slot_dump;
+    // }
 
     // update status park_sensor
     private function updateSensor($input)
@@ -180,12 +180,12 @@ class CarParkSlotController extends Controller
             'id_sensor' => $request['id_sensor'],
         ];
 
-        $slot = $id_slot;
-        $slot_name = CarParkSlot::where('id_slot', $id_slot)
-        ->pluck('slot_name')
-        ->first();
+        // $slot = $id_slot;
+        // $slot_name = CarParkSlot::where('id_slot', $id_slot)
+        // ->pluck('slot_name')
+        // ->first();
 
-        $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
+        // $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
 
         $this->validate($request, $constraints);
 

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 use App\ParkSensor;
 use App\CarParkSlot;
-use App\CarParkSlotDump;
 use App\Http\Requests;
 use Illuminate\Http\Request;
 use App\Transformers\ParkSensorTransformer;
@@ -26,10 +25,10 @@ class ParkSensorController extends Controller
 
         $this->updateStatus($park_sensor); // update status car_park_slot
 
-        $slot = CarParkSlot::where('id_sensor', $park_sensor['id_sensor'])
-        ->first(); 
+        // $slot = CarParkSlot::where('id_sensor', $park_sensor['id_sensor'])
+        // ->first(); 
 
-        $this->createCarParkSlotDumps($slot);
+        // $this->createCarParkSlotDumps($slot);
        
         return fractal()
         ->item($park_sensor)
@@ -60,29 +59,13 @@ class ParkSensorController extends Controller
         return;
     }
 
-    // create table car_park_slot_dump
-    private function createCarParkSlotDumps($slot)
-    {
-        if($slot['id_slot'] != null){
-            $car_park_slot_dump = CarParkSlotDump::create(
-                [
-                    'id_slot' => $slot['id_slot'],
-                    'id_sensor' => $slot['id_sensor'],
-                    'status'  => $slot['status'],
-                    'slot_name' => $slot['slot_name'],
-                ]
-            );
-        }
-
-        return;
-    }
 
     // delete park_sensor
     public function deleteParkSensor(Request $request, $id_sensor)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        CarParkSlotDump::where('id_sensor', $id_sensor)->delete();
+        // CarParkSlotDump::where('id_sensor', $id_sensor)->delete();
         ParkSensor::where('id_sensor', $id_sensor)->delete();
 
         return response()->json('Delete Success');

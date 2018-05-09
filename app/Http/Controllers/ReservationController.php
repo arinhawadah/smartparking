@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\CarParkSlot;
-use App\CarParkSlotDump;
 use App\UserPark;
 use App\ParkSensor;
 use Auth;
@@ -36,8 +35,8 @@ class ReservationController extends Controller
         // $slot = CarParkSlot::where('id_slot', $id_slot)
         // ->first();
 
-        // $old_slot = null;
-        // $this->updateSensor($slot, $old_slot); // update sensor status
+        // // $old_slot = null;
+        // // $this->updateSensor($slot, $old_slot); // update sensor status
 
         // $this->createCarParkSlotDumps($slot); 
             
@@ -110,21 +109,6 @@ class ReservationController extends Controller
 
     //     return $user_park;
     // }
-
-    // create table car_park_slot_dump
-    private function createCarParkSlotDumps($slot)
-    {
-        $car_park_slot_dump = CarParkSlotDump::create(
-            [
-                'id_slot' => $slot['id_slot'],
-                'id_sensor' => $slot['id_sensor'],
-                'status'  => 'OCCUPIED',
-                'slot_name' => $slot['slot_name'],
-            ]
-        );
-
-        return $car_park_slot_dump;
-    }
 
     // update reservation
     public function updateReservation(Request $request, UserPark $user_park, $id_user_park)

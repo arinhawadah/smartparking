@@ -43,13 +43,33 @@ class updateSlotStatus extends Command
         ->whereDate('arrive_time', date('Y-m-d'))
         ->whereDate('leaving_time', date('Y-m-d'))       
         ->where('arrive_time','=',now()->setTimezone("Asia/Jakarta"))
-        ->update(['status' => 'DIBOOKING']);
+        ->update(['status' => 'OCCUPIED']);
 
         DB::table('park_sensors')
         ->leftJoin('car_park_slots','park_sensors.id_sensor','=','car_park_slots.id_sensor')
-        ->where('car_park_slots.status','DIBOOKING')
+        ->where('car_park_slots.status','OCCUPIED')
         ->update(
-            ['park_sensors.status' => 2, 'time' => now()]
+            ['park_sensors.status' => 2, 
+            'time' => now(),
+            ]
+        );
+
+        DB::table('park_sensors')
+        ->leftJoin('car_park_slots','park_sensors.id_sensor','=','car_park_slots.id_sensor')
+        ->where('car_park_slots.status','AVAILABLE')
+        ->update(
+            ['park_sensors.status' => 1, 
+            'time' => now(),
+            ]
+        );
+
+        DB::table('park_sensors')
+        ->leftJoin('car_park_slots','park_sensors.id_sensor','=','car_park_slots.id_sensor')
+        ->where('car_park_slots.status','PARKED')
+        ->update(
+            ['park_sensors.status' => 3, 
+            'time' => now(),
+            ]
         );
 
         // $slot = DB::table('car_park_slots')
