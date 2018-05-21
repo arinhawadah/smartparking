@@ -14,6 +14,24 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CarParkSlotController extends Controller
 {
+    // // get all park slot
+    // public function cobacoba(CarParkSlot $car_park_slot)
+    // {
+    //     $car_park_slot = $car_park_slot
+    //     ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot')
+    //     ->whereDate('arrive_time', date('Y-m-d'))
+    //     ->whereDate('leaving_time', date('Y-m-d'))       
+    //     ->where('arrive_time','=',now()->setTimezone("Asia/Jakarta")->format('Y-m-d H:i:00'))
+    //     ->get();
+
+    //     return fractal()
+    //     ->collection($car_park_slot)
+    //     ->transformWith(new CarParkSlotTransformer)
+    //     ->toArray();
+
+    //     return response()->json($response, 201);
+    // }
+
     // get all park slot
     public function status(CarParkSlot $car_park_slot)
     {

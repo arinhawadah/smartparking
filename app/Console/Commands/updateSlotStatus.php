@@ -38,11 +38,18 @@ class updateSlotStatus extends Command
      */
     public function handle()
     {
+        // DB::table('car_park_slots')
+        // ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot')
+        // ->whereDate('arrive_time', date('Y-m-d'))
+        // ->whereDate('leaving_time', date('Y-m-d'))       
+        // ->where('arrive_time','=',date('Y-m-d H:i:00')->setTimezone("Asia/Jakarta"))
+        // ->update(['status' => 'OCCUPIED']);
+
         DB::table('car_park_slots')
         ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot')
         ->whereDate('arrive_time', date('Y-m-d'))
         ->whereDate('leaving_time', date('Y-m-d'))       
-        ->where('arrive_time','=',now()->setTimezone("Asia/Jakarta"))
+        ->where('arrive_time','=',now()->setTimezone("Asia/Jakarta")->format('Y-m-d H:i:00'))
         ->update(['status' => 'OCCUPIED']);
 
         DB::table('park_sensors')
@@ -73,19 +80,17 @@ class updateSlotStatus extends Command
         );
 
         // $slot = DB::table('car_park_slots')
-        // ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot')
-        // ->whereDate('arrive_time', date('Y-m-d'))
-        // ->whereDate('leaving_time', date('Y-m-d'))       
-        // ->where('arrive_time','=',now()->setTimezone("Asia/Jakarta"))
-        // ->first();
+        // ->where('status', 'OCCUPIED')->firstOrFail();
 
         // DB::table('car_park_slot_dumps')
-        // ->create([                
+        // ->create(
+        //     [
         //     'id_slot' => $slot['id_slot'],
         //     'id_sensor' => $slot['id_sensor'],
         //     'status'  => 'DIBOOKING',
         //     'slot_name' => $slot['slot_name'],
-        //     ]);
+        //     ]
+        // );
 
     	$this->info('Slot Status Update Successfully!');
     }

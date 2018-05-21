@@ -26,6 +26,10 @@ Route::get('users','UserController@users')->middleware('auth.basic');
 Route::post('addreservation','ReservationController@addReservation')->middleware('cors');
 Route::get('carparkslot','CarParkSlotController@status');
 Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@statusAvailableSlot');
+Route::get('carparkslot/{id_slot}','CarParkSlotController@statusById');
+Route::get('history/{id_user}','HistoryController@historybyId');
+
+// Route::get('cobacoba','CarParkSlotController@cobacoba');
 
 //admin
 Route::post('auth/admin/register', 'AuthController@registerAdmin')->middleware('auth.basic');
