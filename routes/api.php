@@ -20,29 +20,30 @@ use Illuminate\Http\Request;
 //user
 Route::post('auth/user/register','AuthController@register');
 Route::post('auth/login','AuthController@login');
+Route::post('auth/user/resetpassword','AuthController@ResetPassword'); //reset password
 Route::get('users/profile','UserController@profile')->middleware('cors');
 Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
-Route::get('users','UserController@users')->middleware('auth.basic');
 Route::post('addreservation','ReservationController@addReservation')->middleware('cors');
 Route::get('carparkslot','CarParkSlotController@status');
 Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@statusAvailableSlot');
-Route::get('carparkslot/{id_slot}','CarParkSlotController@statusById');
+Route::get('carparkslot/{id_user_park}','CarParkSlotController@statusById');
 Route::get('history/{id_user}','HistoryController@historybyId');
 
 // Route::get('cobacoba','CarParkSlotController@cobacoba');
 
 //admin
-Route::post('auth/admin/register', 'AuthController@registerAdmin')->middleware('auth.basic');
-Route::put('admin/updatereserevation/{id_user_park}','ReservationController@updateReservation')->middleware('auth.basic');
-Route::delete('admin/deletereserevation/{id_user_park}','ReservationController@deleteReservation')->middleware('auth.basic');
-Route::post('admin/addslot', 'CarParkSlotController@createParkSlot')->middleware('auth.basic');
-Route::put('admin/updateslot/{slot_name}', 'CarParkSlotController@updateParkSlot')->middleware('auth.basic');
-Route::delete('admin/deleteslot/{slot_name}','CarParkSlotController@deleteParkSlot')->middleware('auth.basic');
+Route::post('auth/admin/register', 'AuthController@registerAdmin')->middleware('cors');
+Route::put('admin/updatereserevation/{id_user_park}','ReservationController@updateReservation')->middleware('cors');
+Route::delete('admin/deletereserevation/{id_user_park}','ReservationController@deleteReservation')->middleware('cors');
+Route::post('admin/addslot', 'CarParkSlotController@createParkSlot')->middleware('cors');
+Route::put('admin/updateslot/{slot_name}', 'CarParkSlotController@updateParkSlot')->middleware('cors');
+Route::delete('admin/deleteslot/{slot_name}','CarParkSlotController@deleteParkSlot')->middleware('cors');
 Route::delete('admin/deleteuser/{id_user}','UserController@deleteUser')->middleware('auth.basic');
+Route::get('admin/showuser','UserController@users')->middleware('auth.basic');
 Route::get('admin/showuserid/{id_user}','UserController@showUserbyId')->middleware('auth.basic');
 Route::get('admin/showuseremail/{email}','UserController@showUserbyEmail')->middleware('auth.basic');
 Route::get('admin/carparkslot/{time}','CarParkSlotController@statusByTime');
-Route::delete('deletesensor/{id_sensor}','ParkSensorController@deleteParkSensor')->middleware('auth.basic');
+Route::delete('deletesensor/{id_sensor}','ParkSensorController@deleteParkSensor')->middleware('cors');
 
 // sensor
 Route::get('parksensor/id_sensor={id_sensor}&&status={status}','ParkSensorController@addSensor');

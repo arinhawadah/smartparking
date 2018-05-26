@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 
+use Illuminate\Http\Request;
+use App\User;
+
 class ResetPasswordController extends Controller
 {
     /*
@@ -35,5 +38,18 @@ class ResetPasswordController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+    }
+
+    public function resetpassword(Request $request)
+    {
+       
+        $user = User::where('email', $request->email)
+        ->update(
+            [
+                'password' => bcrypt('123456'),
+            ]
+        );
+        
+        return "Your New Password 123456";
     }
 }

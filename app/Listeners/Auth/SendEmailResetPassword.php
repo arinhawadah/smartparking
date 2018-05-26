@@ -2,13 +2,13 @@
 
 namespace App\Listeners\Auth;
 
-use App\Events\Auth\UserActivationEmail;
+use App\Events\Auth\EmailResetPassword;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Mail;
-use App\Mail\Auth\ActivationEmail;
+use App\Mail\Auth\ResetPassword;
 
-class SendActivationEmail
+class SendEmailResetPassword
 {
     /**
      * Create the event listener.
@@ -23,11 +23,12 @@ class SendActivationEmail
     /**
      * Handle the event.
      *
-     * @param  UserActivationEmail  $event
+     * @param  EmailResetPassword  $event
      * @return void
      */
-    public function handle(UserActivationEmail $event)
+    public function handle(EmailResetPassword $event)
     {
-        Mail::to($event->user_registration->email)->send(new ActivationEmail($event->user_registration));
+
+        Mail::to($event->user->email)->send(new ResetPassword($event->user));
     }
 }

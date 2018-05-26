@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Events\Auth\UserActivationEmail;
+use App\Events\Auth\EmailResetPassword;
 use Illuminate\Validation\Rule;
 use App\Http\Requests;
 use App\UserRegistration;
@@ -18,6 +19,11 @@ use JWTAuthException;
 
 class AuthController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth', ['only' => ['registerAdmin']]);
+    }
+
     // register
     public function register(Request $request, UserRegistration $user_registration)
     {
@@ -113,7 +119,7 @@ class AuthController extends Controller
         ], ['Please verifiy your email']);
         
         if (!Auth::attempt(['email'=>$request->email,'password'=>$request->password])){
-            return response()->json(['error'=>'Your credential is wrong',401]);
+            return response()->json(['error'=>'Your credential is wrong'],401);
         }
 
         $token = null;
@@ -140,4 +146,17 @@ class AuthController extends Controller
         ])
         ->toArray();
     }
+
+    //reset password
+    public function ResetPassword(Request $request, User $user)
+    {
+        $this->validate($request, [
+            'email'=> 'required|email',
+        ]);
+
+        $user = $user->where('email', $request->email)->first();
+
+        event(new EmailResetPassword($user));
+    }
+
 }

@@ -46,7 +46,7 @@ class updateSlotStatus extends Command
         // ->update(['status' => 'OCCUPIED']);
 
         DB::table('car_park_slots')
-        ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot')
+        ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot_user_park')
         ->whereDate('arrive_time', date('Y-m-d'))
         ->whereDate('leaving_time', date('Y-m-d'))       
         ->where('arrive_time','=',now()->setTimezone("Asia/Jakarta")->format('Y-m-d H:i:00'))

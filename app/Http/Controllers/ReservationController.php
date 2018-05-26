@@ -16,7 +16,7 @@ class ReservationController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt.auth', ['only' => ['addReservation']]);
+        $this->middleware('jwt.auth', ['only' => ['addReservation', 'updateReservation', 'deleteReservation']]);
     }
 
     //add new reservation
@@ -44,7 +44,7 @@ class ReservationController extends Controller
                     
         $user_park = $user_park->create([
             'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
-            'id_slot' => $request->id_slot,
+            'id_slot_user_park' => $request->id_slot,
             'unique_id' => Auth::user()->unique_id, 
             'arrive_time' => date('Y-m-d').' '.$request->arrive_time,
             'leaving_time' => date('Y-m-d').' '.$request->leaving_time,
@@ -69,30 +69,30 @@ class ReservationController extends Controller
         return response()->json($response, 201);
     }
 
-    // update status car_park_slot
-    private function updateStatus($id_slot)
-    {
-        $car_park_slot = CarParkSlot::UpdateOrCreate(
-            ['id_slot' =>$id_slot],
-            ['status' => 'OCCUPIED']
-        );
+    // // update status car_park_slot
+    // private function updateStatus($id_slot)
+    // {
+    //     $car_park_slot = CarParkSlot::UpdateOrCreate(
+    //         ['id_slot' =>$id_slot],
+    //         ['status' => 'OCCUPIED']
+    //     );
 
-        return $car_park_slot;
-    }
+    //     return $car_park_slot;
+    // }
 
-    // update status park_sensor
-    private function updateSensor($slot, $old_slot)
-    {
-        $park_sensor = ParkSensor::where('id_sensor',$old_slot['id_sensor'])->update(
-            ['status' => 1]
-        );
+    // // update status park_sensor
+    // private function updateSensor($slot, $old_slot)
+    // {
+    //     $park_sensor = ParkSensor::where('id_sensor',$old_slot['id_sensor'])->update(
+    //         ['status' => 1]
+    //     );
 
-        $park_sensor = ParkSensor::where('id_sensor',$slot['id_sensor'])->update(
-            ['status' => 2]
-        );
+    //     $park_sensor = ParkSensor::where('id_sensor',$slot['id_sensor'])->update(
+    //         ['status' => 2]
+    //     );
 
-        return $park_sensor;
-    }
+    //     return $park_sensor;
+    // }
 
     // create table user_parks
     // private function createReservationTime($input)
@@ -162,7 +162,7 @@ class ReservationController extends Controller
         $user_park = DB::table('user_parks')->where('id_user_park', $id_user_park)
         ->update(
             array(
-                'id_slot' => $id_slot,
+                'id_slot_user_park' => $id_slot,
                 'arrive_time' => date('Y-m-d').' '.$update['arrive_time'],
                 'leaving_time' => date('Y-m-d').' '.$update['leaving_time'],
                 'price' => $update['price'],
@@ -211,11 +211,10 @@ class ReservationController extends Controller
     {
         $history_transaction = HistoryTransaction::insert(
             [
-                'id_slot' => $user_park['id_slot'],
+                'id_slot' => $user_park['id_slot_user_park'],
                 'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
                 'id_user_park'  => $user_park['id_user_park'],
                 'price' => $user_park['price'],
-                'status_transaction' => 'UNPAID',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]

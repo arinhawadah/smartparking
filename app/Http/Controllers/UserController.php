@@ -16,7 +16,7 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt.auth', ['only' => ['profile']]);
+        $this->middleware('jwt.auth', ['only' => ['profile', 'showUserbyId']]);
     }
 
     public function users(Request $request, User $user)

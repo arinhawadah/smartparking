@@ -9,6 +9,11 @@ use App\Transformers\ParkSensorTransformer;
 
 class ParkSensorController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth', ['only' => ['deleteParkSensor']]);
+    }
+
     // add new sensor or update sensor status
     public function addSensor(Request $request, ParkSensor $park_sensor, $id_sensor, $status)
     {

@@ -14,6 +14,11 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CarParkSlotController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth', ['only' => ['createParkSlot', 'updateParkSlot', 'deleteParkSlot']]);
+    }
+
     // // get all park slot
     // public function cobacoba(CarParkSlot $car_park_slot)
     // {
@@ -45,6 +50,75 @@ class CarParkSlotController extends Controller
         return response()->json($response, 201);
     }
 
+    // get all park slot
+    public function statusById(CarParkSlot $car_park_slot, UserPark $user_park, $id_user_park)
+    {
+        $user_park = $user_park
+        ->where('id_user_park','=', $id_user_park)
+        ->select('id_slot_user_park', 'arrive_time', 'leaving_time')
+        ->first();
+
+        $car_park_slot = $car_park_slot
+        ->where('id_slot','=', $user_park['id_slot_user_park'])
+        ->first();
+
+        if($car_park_slot['status'] == 'PARKED')
+        {
+            $sub_time_1 = strtotime($user_park['arrive_time']) - 60; // "- 60" means, arrive_time - 1 minutes
+            $arrive_time1 = date('H:i', $sub_time_1);
+            $sub_time_2 = strtotime($user_park['leaving_time']) - 60;
+            $leaving_time1 = date('H:i', $sub_time_2);
+    
+            $sub_time_3 = strtotime($user_park['arrive_time']) + 60; // "+ 60" means, arrive_time + 1 minutes
+            $arrive_time2 = date('H:i', $sub_time_3);
+            $sub_time_4 = strtotime($user_park['leaving_time']) + 60;
+            $leaving_time2 = date('H:i', $sub_time_4);
+    
+            $day_check = $user_park->whereDate('arrive_time', date('Y-m-d'))->first();
+            // dd($day_check);
+    
+            if ($day_check != NULL)
+            {
+                try { //cobain pake foreach deh rin misal cek slot 1 -> ada jam itu atau nggak, kalo ada lanjut ke slot 2,3,4,5,dst
+                    $car_park_slot = $car_park_slot
+                    ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot_user_park')
+                    ->where('status','<>' ,'PARKED') // bedanya cuma ini sama yg cek availability slot
+                    ->whereDate('arrive_time', date('Y-m-d'))
+                    ->whereDate('leaving_time', date('Y-m-d'))       
+                    ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
+                    ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
+                    // ->orWhere('status', 'AVAILABLE')
+                    ->select('car_park_slots.id_slot','car_park_slots.slot_name')
+                    ->orderBy('car_park_slots.id_slot','asc')
+                    // ->take(1)
+                    ->firstOrFail();
+                    // ->get();
+                    // dd($car_park_slot);
+                  } catch (ModelNotFoundException $ex) {
+                    return response()->json("Full Booked", 404);
+                  }       
+            }
+            else
+            {
+                $car_park_slot = $car_park_slot
+                ->where('status', 'AVAILABLE')
+                ->select('car_park_slots.id_slot','car_park_slots.slot_name')
+                ->orderBy('car_park_slots.id_slot','asc')
+                // ->take(0)
+                ->firstOrFail();
+            }
+    
+            return fractal()
+                    ->item($car_park_slot)
+                    ->transformWith(new AvailableTimeTransformer)
+                    ->toArray();
+            
+                    return response()->json($response, 201);
+        }
+
+        return response()->json(['status' => $car_park_slot->status], 200);
+    }
+
     // get first available slot
     public function statusAvailableSlot(CarParkSlot $car_park_slot, $arrive_time, $leaving_time, UserPark $user_park)
     {
@@ -63,9 +137,9 @@ class CarParkSlotController extends Controller
 
         if ($day_check != NULL)
         {
-            try {
+            try { //cobain pake foreach deh rin misal cek slot 1 -> ada jam itu atau nggak, kalo ada lanjut ke slot 2,3,4,5,dst
                 $car_park_slot = $car_park_slot
-                ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot')
+                ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot_user_park')
                 ->whereDate('arrive_time', date('Y-m-d'))
                 ->whereDate('leaving_time', date('Y-m-d'))       
                 ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
@@ -75,6 +149,8 @@ class CarParkSlotController extends Controller
                 ->orderBy('car_park_slots.id_slot','asc')
                 // ->take(1)
                 ->firstOrFail();
+                // ->get();
+                // dd($car_park_slot);
               } catch (ModelNotFoundException $ex) {
                 return response()->json("Full Booked", 404);
               }       
@@ -225,7 +301,7 @@ class CarParkSlotController extends Controller
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        CarParkSlotDump::where('id_slot', $id_slot)->delete();
+        // CarParkSlotDump::where('id_slot', $id_slot)->delete();
         CarParkSlot::where('id_slot', $id_slot)->delete();
 
         return response()->json('Delete Success');

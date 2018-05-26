@@ -16,6 +16,6 @@ class UserPark extends Model
      * @var array
      */
     protected $fillable = [
-        'id_user','id_slot', 'unique_id', 'arrive_time', 'leaving_time','price'
+        'id_user','id_slot_user_park', 'unique_id', 'arrive_time', 'leaving_time','price'
     ];
 }
