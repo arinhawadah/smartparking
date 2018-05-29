@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\ParkSensor;
+use App\ParkSensorResp;
 use App\CarParkSlot;
 use App\Http\Requests;
 use Illuminate\Http\Request;
@@ -14,57 +15,6 @@ class ParkSensorController extends Controller
         $this->middleware('jwt.auth', ['only' => ['deleteParkSensor']]);
     }
 
-    // add new sensor or update sensor status
-    public function addSensor(Request $request, ParkSensor $park_sensor, $id_sensor, $status)
-    {
-        // $this->validate($request, [
-        //     'id_sensor' => 'required|unique:park_sensors',
-        //     'status'=> 'required',
-        // ]);
-    
-        $park_sensor = $park_sensor->UpdateOrCreate(
-            ['id_sensor' => $id_sensor],
-            ['status' => $status,
-            'time' => now()]
-        );
-
-        $this->updateStatus($park_sensor); // update status car_park_slot
-
-        // $slot = CarParkSlot::where('id_sensor', $park_sensor['id_sensor'])
-        // ->first(); 
-
-        // $this->createCarParkSlotDumps($slot);
-       
-        return fractal()
-        ->item($park_sensor)
-        ->transformWith(new ParkSensorTransformer)
-        ->toArray();
-    
-        return response()->json($response, 201);
-    }
-
-    // update status car_park_slot
-    private function updateStatus($park_sensor)
-    {
-        if($park_sensor['status'] == 1){
-            $car_park_slot = CarParkSlot::where('id_sensor',$park_sensor['id_sensor'])->update(
-                ['status' => 'AVAILABLE']
-              );
-        }
-        elseif($park_sensor['status'] == 2){
-            $car_park_slot = CarParkSlot::where('id_sensor',$park_sensor['id_sensor'])->update(
-                ['status' => 'OCCUPIED']
-              );
-        }        
-        else{
-            $park_sensor = CarParkSlot::where('id_sensor',$park_sensor['id_sensor'])->update(
-                ['status' => 'PARKED']
-              );
-        }
-        return;
-    }
-
-
     // delete park_sensor
     public function deleteParkSensor(Request $request, $id_sensor)
     {
@@ -72,6 +22,7 @@ class ParkSensorController extends Controller
 
         // CarParkSlotDump::where('id_sensor', $id_sensor)->delete();
         ParkSensor::where('id_sensor', $id_sensor)->delete();
+        ParkSensorResp::where('id_sensor', $id_sensor)->delete();
 
         return response()->json('Delete Success');
     }

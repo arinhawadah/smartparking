@@ -16,7 +16,7 @@ class CarParkSlotController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt.auth', ['only' => ['createParkSlot', 'updateParkSlot', 'deleteParkSlot']]);
+        $this->middleware('jwt.auth', ['only' => ['createParkSlot', 'deleteParkSlot']]);
     }
 
     // // get all park slot
@@ -38,16 +38,19 @@ class CarParkSlotController extends Controller
     // }
 
     // get all park slot
-    public function status(CarParkSlot $car_park_slot)
+    public function status(Request $request, CarParkSlot $car_park_slot)
     {
-        $car_park_slot = $car_park_slot->all();
+        $car_park_slot = $car_park_slot->paginate($car_park_slot->count());
 
+        if ($request->wantsJson())
+        {
         return fractal()
         ->collection($car_park_slot)
         ->transformWith(new CarParkSlotTransformer)
         ->toArray();
+        }
 
-        return response()->json($response, 201);
+        return view('slot-mgmt/index', ['slot' => $car_park_slot]);
     }
 
     // get all park slot
@@ -189,6 +192,17 @@ class CarParkSlotController extends Controller
         return response()->json($response, 201);
     }
 
+    //search reservation by id_user_park
+    public function slotbyId(Request $request, $id_slot)
+    {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
+        $slot = CarParkSlot::findOrFail($id_slot);
+        $sensor = ParkSensor::all();
+        
+        return view('slot-mgmt/edit', ['slot' => $slot, 'sensor' => $sensor]);
+    }
+
     // create new slot
     public function createParkSlot(Request $request, CarParkSlot $car_park_slot)
     {
@@ -273,14 +287,7 @@ class CarParkSlotController extends Controller
             'status' => $request['status'],
             'id_sensor' => $request['id_sensor'],
         ];
-
-        // $slot = $id_slot;
-        // $slot_name = CarParkSlot::where('id_slot', $id_slot)
-        // ->pluck('slot_name')
-        // ->first();
-
-        // $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
-
+        
         $this->validate($request, $constraints);
 
         CarParkSlot::where('id_slot', $id_slot)->update($input);
@@ -288,12 +295,16 @@ class CarParkSlotController extends Controller
 
         $editslot = CarParkSlot::findOrFail($id_slot);
 
-        return fractal()
-        ->item($editslot)
-        ->transformWith(new CarParkSlotTransformer)
-        ->toArray();
+        if ($request->wantsJson())
+        {
+            return fractal()
+            ->item($editslot)
+            ->transformWith(new CarParkSlotTransformer)
+            ->toArray();
+        }
 
-        return response()->json($response, 201);
+        return redirect()->intended('admin/carparkslot');
+
     }
 
     // delete car_park_slot

@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use App\User;
+use Auth;
+use JWTAuth;
+use JWTAuthException;
 
 class LoginController extends Controller
 {
@@ -27,7 +31,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/dashboard';
 
     /**
      * Create a new controller instance.
@@ -48,12 +52,17 @@ class LoginController extends Controller
     protected function validateLogin(Request $request)
     {
         $this->validate($request, [
-            $this->username() => [
+            'email' => [
                 'required','string',
-                Rule::exists('users')
+                Rule::exists('user_credentials')
             ],
-            'password' => 'required|string',
-        ], $this->validationError());
+        ], ['Please verifiy your email']);
+
+        if (!Auth::attempt(['email'=>$request->email,'password'=>$request->password],true)){
+            return response()->json(['error'=>'Your credential is wrong'],401);
+        }
+
+        $token = null;
     }
 
     /**

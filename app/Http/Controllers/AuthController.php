@@ -19,10 +19,10 @@ use JWTAuthException;
 
 class AuthController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('jwt.auth', ['only' => ['registerAdmin']]);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('jwt.auth', ['only' => ['registerAdmin']]);
+    // }
 
     // register
     public function register(Request $request, UserRegistration $user_registration)
@@ -68,7 +68,7 @@ class AuthController extends Controller
         return response()->json('Register Success');
     }
 
-    // resgister admin
+    // register admin
     public function registerAdmin(Request $request, User $user)
     {
         $request->user()->authorizeRoles(['Super Admin']);
@@ -105,7 +105,7 @@ class AuthController extends Controller
         // ->toArray();
 
         // return response()->json($response, 201);
-        return response()->json('Register Success');
+        return view('users-mgmt/index', ['users' => $users]);
     }
 
     // login
@@ -136,15 +136,21 @@ class AuthController extends Controller
             }
 
         $user = $user->find(Auth::user()->id_user);
-
-        return fractal()
-        ->item($user)
-        ->transformWith(new UserCredentialTransformer)
-        ->addMeta([
-            // 'token' => $user->activation_token,
-            'token' => $token,
-        ])
-        ->toArray();
+        
+                if ($request->wantsJson()){
+                    
+                    return fractal()
+                    ->item($user)
+                    ->transformWith(new UserCredentialTransformer)
+                    ->addMeta([
+                        // 'token' => $user->activation_token,
+                        'token' => $token,
+                    ])
+                    ->toArray();
+                    
+                }
+        
+                return redirect('/');
     }
 
     //reset password
