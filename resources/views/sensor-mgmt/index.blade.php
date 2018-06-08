@@ -1,4 +1,4 @@
-@extends('slot-mgmt.base')
+@extends('sensor-mgmt.base')
 @section('action-content')
     <!-- Main content -->
     <section class="content">
@@ -9,7 +9,7 @@
           <h3 class="box-title">List of slots</h3>
         </div>
         <div class="col-sm-4">
-          <a class="btn btn-primary" href="{{ route('slot-admin.create') }}">Add new slot</a>
+          <a class="btn btn-primary" href="{{ route('sensor-admin.create') }}">Add new sensor</a>
         </div>
     </div>
   </div>
@@ -25,9 +25,9 @@
           <table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
             <thead>
               <tr role="row">
-                <th width="5%" class="hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" >Id</th>
-                <th width="20%" class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Slot Name</th>
+                <th width="5%" class="hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" >Entry</th>
                 <th width="10%" class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Id Sensor</th>
+                <th width="20%" class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Time</th>
                 <th width="20%" class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Status</th>
                 <th tabindex="0" aria-controls="example2" rowspan="1" colspan="2" aria-label="Action: activate to sort column ascending">Action</th>
               </tr>
@@ -35,15 +35,15 @@
             <tbody>
             @foreach ($slot as $slots)
                 <tr role="row" class="odd">
-                  <td class="sorting_1">{{ $slots->id_slot }}</td>
-                  <td class="hidden-xs">{{ $slots->slot_name }}</td>
+                  <td class="sorting_1">{{ $slots->entry }}</td>
                   <td class="hidden-xs">{{ $slots->id_sensor }}</td>
+                  <td class="hidden-xs">{{ $slots->time }}</td>
                   <td class="hidden-xs">{{ $slots->status }}</td>
                   <td>
-                    <form class="row" method="POST" action="{{ route('slot-admin.destroy', ['id_slot' => $slots->id_slot]) }}" onsubmit = "return confirm('Are you sure?')">
+                    <form class="row" method="POST" action="{{ route('sensor-admin.destroy', ['id_sensor' => $slots->id_sensor]) }}" onsubmit = "return confirm('Are you sure?')">
                         <input type="hidden" name="_method" value="DELETE">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <a href="{{ route('slot-admin.edit', ['id_slot' => $slots->id_slot]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
+                        <a href="{{ route('sensor-admin.edit', ['entry' => $slots->entry]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
                         Update
                         </a>
                         @if ($slots->email != Auth::user()->email)

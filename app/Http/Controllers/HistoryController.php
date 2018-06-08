@@ -11,7 +11,7 @@ class HistoryController extends Controller
      // get history each user
      public function historybyId(HistoryTransaction $history_transaction, $id_user)
      {
-        $history_transaction = HistoryTransaction::where('id_user',$id_user)->get();
+        $history_transaction = HistoryTransaction::where('id_user',$id_user)->orderBy('created_at','desc')->get();
         
         return fractal()
         ->collection($history_transaction)

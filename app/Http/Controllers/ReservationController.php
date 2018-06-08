@@ -11,6 +11,7 @@ use App\HistoryTransaction;
 use Auth;
 use JWTAuth;
 use DB;
+use App\Role;
 use App\Transformers\ReservationTransformer;
 
 class ReservationController extends Controller
@@ -26,13 +27,13 @@ class ReservationController extends Controller
         return view('reservation-mgmt/create', ['slot' => $slot]);
     }
 
-    public function reservation(Request $request, UserPark $user_park)
+    public function index(Request $request, UserPark $user_park)
     {
         // $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
         // $users = $user->all();
 
-        $user = $user_park
+        $users = $user_park
         ->leftJoin('user_credentials','user_parks.id_user','=','user_credentials.id_user')
         ->leftJoin('car_park_slots','user_parks.id_slot_user_park','=','car_park_slots.id_slot')
         ->whereMonth('arrive_time','=',date('m'))
@@ -41,15 +42,15 @@ class ReservationController extends Controller
         ->orderBy('id_user_park', 'desc')
         ->paginate(10);
 
-        if ($request->wantsJson())
-        {
-        return fractal()
-        ->collection($users)
-        ->transformWith(new UserCredentialTransformer)
-        ->toArray();
-        }
+        // if ($request->wantsJson())
+        // {
+        // return fractal()
+        // ->collection($users)
+        // ->transformWith(new UserCredentialTransformer)
+        // ->toArray();
+        // }
 
-        return view('reservation-mgmt/index', ['users' => $user]);
+        return view('reservation-mgmt/index', ['users' => $users]);
     }
 
     //add new reservation user
@@ -63,17 +64,6 @@ class ReservationController extends Controller
         ]);
 
         $id_slot = $request->id_slot;
-        // $input = $request->all();
-
-        // $this->updateStatus($id_slot); // update status car_park_slot
-
-        // $slot = CarParkSlot::where('id_slot', $id_slot)
-        // ->first();
-
-        // // $old_slot = null;
-        // // $this->updateSensor($slot, $old_slot); // update sensor status
-
-        // $this->createCarParkSlotDumps($slot);
 
         $check_sensor = CarParkSlot::where('id_slot', $id_slot)->select('id_sensor')->first();
 
@@ -92,18 +82,14 @@ class ReservationController extends Controller
 
         $this->historyTransaction($user_park);
 
-        // $this->createReservationTime($input); // create reservation time, input arrive_time, leaving_time, and price
-
         return fractal()
         ->item($user_park)
         ->transformWith(new ReservationTransformer)
         ->toArray();
-
-        return response()->json($response, 201);
     }
 
     //add new reservation admin
-    public function addAdminReservation(Request $request, UserPark $user_park, User $user)
+    public function store(Request $request, UserPark $user_park, User $user)
     {
         $this->validate($request,[
             'email'=> 'required',
@@ -127,14 +113,173 @@ class ReservationController extends Controller
             'id_user' => $user->id_user,
             'id_slot_user_park' => $request->id_slot,
             'unique_id' => $user->unique_id, 
-            'arrive_time' => date('Y-m-d').' '.$request->arrive_time,
-            'leaving_time' => date('Y-m-d').' '.$request->leaving_time,
+            'arrive_time' => $request->arrive_time,
+            'leaving_time' => $request->leaving_time,
             'price' => $request->price,
         ]);
 
         $this->historyTransactionfromAdmin($user_park);
-        return redirect('/admin/showreservation');
+        return redirect()->intended('/reservation-admin');
+    }
+
+    // update reservation
+    public function updateReservation(Request $request, UserPark $user_park, $id_user_park)
+    {
+        $user_park = UserPark::findOrFail($id_user_park);
+
+        $constraints = [
+            'id_slot' => 'required',
+            ];
+
+        $this->validate($request, $constraints);
+
+        // $this->updateReservationTime($update, $id_reservation); // update reservation time 
+        $user_park = $user_park->where('id_user_park', $id_user_park)
+            ->update(
+                [
+                    'id_slot_user_park' => $request->id_slot,
+                ]
+            );
+
+        $editreservation = UserPark::findOrFail($id_user_park);
+        
+        return fractal()
+        ->item($editreservation)
+        ->transformWith(new ReservationTransformer)
+        ->toArray();
+    }
+
+    // update reservation for admin
+    public function update(Request $request, UserPark $user_park, $id_user_park)
+    {
+            $user_park = UserPark::findOrFail($id_user_park);
+    
+            $constraints = [
+                'id_slot' => 'required',
+                'arrive_time' => 'required',
+                'leaving_time' => 'required',
+                'price' => 'required'
+                ];
+    
+            $id_slot = $request->id_slot;
+            $update = $request->except('id_slot');
+    
+            $this->validate($request, $constraints);
+    
+            $user_park = $user_park->where('id_user_park', $id_user_park)
+            ->update(
+                [
+                    'id_slot_user_park' => $id_slot,
+                    'arrive_time' => $update['arrive_time'],
+                    'leaving_time' => $update['leaving_time'],
+                    'price' => $update['price'],
+                ]
+            );
+    
+            $editreservation = UserPark::findOrFail($id_user_park);
+    
+            return redirect()->intended('reservation-admin');
+    }
+
+    // delete reservation
+    public function destroy(Request $request, $id_user_park)
+    {
+        // $request->user()->authorizeRoles(['Super Admin', 'Admin', 'User']);
+
+        UserPark::where('id_user_park', $id_user_park)->delete();
+        HistoryTransaction::where('id_user_park', $id_user_park)->delete();
+
+        if ($request->wantsJson()){
+        return response()->json('Delete Success');
         }
+
+        return redirect()->intended('reservation-admin');
+    }
+
+    //history transaction
+    private function historyTransaction($user_park)
+    {
+        $history_transaction = HistoryTransaction::insert(
+            [
+                'id_slot' => $user_park['id_slot_user_park'],
+                'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
+                'id_user_park'  => $user_park['id_user_park'],
+                'price' => $user_park['price'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+        return $history_transaction;
+    }
+
+    //history transaction
+    private function historyTransactionfromAdmin($user_park)
+    {
+        $history_transaction = HistoryTransaction::insert(
+            [
+                'id_slot' => $user_park['id_slot_user_park'],
+                'id_user' => $user_park['id_user'],
+                'id_user_park'  => $user_park['id_user_park'],
+                'price' => $user_park['price'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+        return $history_transaction;
+    }
+
+    //search reservation by id_user_park
+    public function edit(Request $request, $id_user_park)
+    {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
+        $user = UserPark::findOrFail($id_user_park);
+        $slot = CarParkSlot::all();
+
+        // if ($request->wantsJson())
+        // {
+        // return fractal()
+        // ->item($user)
+        // ->transformWith(new UserCredentialTransformer)
+        // ->toArray();
+        // }
+        
+        return view('reservation-mgmt/edit', ['user' => $user, 'slot' => $slot]);
+    }
+
+    //search reservation by id_user
+    public function showReservationbyUser(Request $request, User $user)
+    {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
+        $constraints = [
+            'name' => $request['name'],
+            ];
+
+       $users = $this->doSearchingQuery($constraints);
+
+        return view('reservation-mgmt/index', ['users' => $users, 'searchingVals' => $constraints]);
+    }
+
+    private function doSearchingQuery($constraints) {
+        $query = UserPark::leftJoin('user_credentials','user_parks.id_user','=','user_credentials.id_user')
+        ->leftJoin('car_park_slots','user_parks.id_slot_user_park','=','car_park_slots.id_slot')
+        ->whereMonth('arrive_time','=',date('m'))
+        ->select('car_park_slots.slot_name','user_parks.arrive_time','user_parks.leaving_time','user_parks.price',
+        'user_parks.id_user_park','user_credentials.name')
+        ->orderBy('id_user_park', 'desc');
+        $fields = array_keys($constraints);
+        $index = 0;
+        foreach ($constraints as $constraint) {
+            if ($constraint != null) {
+                $query = $query->where( $fields[$index], 'like', '%'.$constraint.'%');
+            }
+
+            $index++;
+        }
+        $querys = $query->count();
+        return $query->paginate($querys);
+    }
 
     // // update status car_park_slot
     // private function updateStatus($id_slot)
@@ -181,74 +326,6 @@ class ReservationController extends Controller
     //     return $user_park;
     // }
 
-    // update reservation
-    public function updateReservation(Request $request, UserPark $user_park, $id_user_park)
-    {
-        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
-
-        $user_park = UserPark::findOrFail($id_user_park);
-
-        $constraints = [
-            'id_slot' => 'required',
-            'arrive_time' => 'required',
-            'leaving_time' => 'required',
-            'price' => 'required'
-            ];
-
-        $input = [
-            'id_slot' => $request['id_slot'],
-            'arrive_time' => $request['arrive_time'],
-            'leaving_time' => $request['leaving_time'],
-            'price' => $request['price'],
-        ];
-
-        $id_slot = $request->id_slot;
-        $update = $request->except('id_slot');
-        
-        // $old_slot_status = CarParkSlot::where('id_slot',$user_park['id_slot'])
-        // ->update(['status'=>'AVAILABLE']); // update old status car_park_slot before input update
-        
-        // $this->updateStatus($id_slot); // update status car_park_slot
-        
-        // $old_slot = CarParkSlot::where('id_slot',$user_park['id_slot'])->first();
-
-        // $slot = CarParkSlot::where('id_slot', $id_slot)
-        // ->first();
-
-        // $this->updateSensor($slot, $old_slot); // update sensor status
-
-        // $this->createCarParkSlotDumps($slot);
-
-        // $reservation_buffer = $reservation_buffer->where('id_reservation', $id_reservation)->update([
-        //     'id_slot' => $slot['id_slot'],
-        // ]);
-
-        $this->validate($request, $constraints);
-
-        // $this->updateReservationTime($update, $id_reservation); // update reservation time 
-        $user_park = $user_park->where('id_user_park', $id_user_park)
-        ->update(
-            array(
-                'id_slot_user_park' => $id_slot,
-                'arrive_time' => $update['arrive_time'],
-                'leaving_time' => $update['leaving_time'],
-                'price' => $update['price'],
-            )
-        );
-
-        $editreservation = UserPark::findOrFail($id_user_park);
-        
-        if ($request->wantsJson())
-        {
-        return fractal()
-        ->item($editreservation)
-        ->transformWith(new ReservationTransformer)
-        ->toArray();
-        }
-
-        return redirect()->intended('admin/showreservation');
-    }
-
     // update table user_parks
     // private function updateReservationTime($update, $id_user_park)
     // {
@@ -265,104 +342,4 @@ class ReservationController extends Controller
 
     //     return $user_park;
     // }
-
-    // delete reservation
-    public function deleteReservation(Request $request, $id_user_park)
-    {
-        // $request->user()->authorizeRoles(['Super Admin', 'Admin', 'User']);
-
-        UserPark::where('id_user_park', $id_user_park)->delete();
-        HistoryTransaction::where('id_user_park', $id_user_park)->delete();
-
-        if ($request->wantsJson()){
-        return response()->json('Delete Success');
-        }
-
-        return redirect('/admin/showreservation');
-    }
-
-    //history transaction
-    private function historyTransaction($user_park)
-    {
-        $history_transaction = HistoryTransaction::insert(
-            [
-                'id_slot' => $user_park['id_slot_user_park'],
-                'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
-                'id_user_park'  => $user_park['id_user_park'],
-                'price' => $user_park['price'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-        return $history_transaction;
-    }
-
-    //history transaction
-    private function historyTransactionfromAdmin($user_park)
-    {
-        $history_transaction = HistoryTransaction::insert(
-            [
-                'id_slot' => $user_park['id_slot_user_park'],
-                'id_user' => $user_park['id_user'],
-                'id_user_park'  => $user_park['id_user_park'],
-                'price' => $user_park['price'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-        return $history_transaction;
-    }
-
-    //search reservation by id_user_park
-    public function showReservationbyId(Request $request, $id_user_park)
-    {
-        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
-
-        $user = UserPark::findOrFail($id_user_park);
-        $slot = CarParkSlot::all();
-
-        if ($request->wantsJson())
-        {
-        return fractal()
-        ->item($user)
-        ->transformWith(new UserCredentialTransformer)
-        ->toArray();
-        }
-        
-        return view('reservation-mgmt/edit', ['user' => $user, 'slot' => $slot]);
-    }
-
-    //search reservation by id_user
-    public function showReservationbyUser(Request $request, User $user)
-    {
-        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
-
-        $constraints = [
-            'name' => $request['name'],
-            ];
-
-       $users = $this->doSearchingQuery($constraints);
-
-        return view('reservation-mgmt/index', ['users' => $users, 'searchingVals' => $constraints]);
-    }
-
-    private function doSearchingQuery($constraints) {
-        $query = UserPark::leftJoin('user_credentials','user_parks.id_user','=','user_credentials.id_user')
-        ->leftJoin('car_park_slots','user_parks.id_slot_user_park','=','car_park_slots.id_slot')
-        ->whereMonth('arrive_time','=',date('m'))
-        ->select('car_park_slots.slot_name','user_parks.arrive_time','user_parks.leaving_time','user_parks.price',
-        'user_parks.id_user_park','user_credentials.name')
-        ->orderBy('id_user_park', 'desc');
-        $fields = array_keys($constraints);
-        $index = 0;
-        foreach ($constraints as $constraint) {
-            if ($constraint != null) {
-                $query = $query->where( $fields[$index], 'like', '%'.$constraint.'%');
-            }
-
-            $index++;
-        }
-        $querys = $query->count();
-        return $query->paginate($querys);
-    }
 }

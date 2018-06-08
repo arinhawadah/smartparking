@@ -1,4 +1,4 @@
-@extends('users-mgmt.base')
+@extends('balance-mgmt.base')
 @section('action-content')
     <!-- Main content -->
     <section class="content">
@@ -6,11 +6,10 @@
   <div class="box-header">
     <div class="row">
         <div class="col-sm-8">
-          <h3 class="box-title">List of users</h3>
+          <h3 class="box-title">List of balance</h3>
         </div>
         <div class="col-sm-4">
-          <a class="btn btn-primary" href="{{ url('admin/createuser') }}">Add new user</a>
-          <a class="btn btn-primary" href="{{ route('user-admin.create') }}">Add new admin</a>
+          <a class="btn btn-primary" href="{{ route('balance-admin.create') }}">Add new balances</a>
         </div>
     </div>
   </div>
@@ -20,7 +19,7 @@
         <div class="col-sm-6"></div>
         <div class="col-sm-6"></div>
       </div>
-      <form method="POST" action="{{ route('email-search') }}">
+      <form method="POST" action="{{ route('balance-search') }}">
          {{ csrf_field() }}
          @component('layouts.search', ['title' => 'Search'])
           @component('layouts.two-cols-search-row', ['items' => ['Email'],
@@ -35,31 +34,27 @@
             <thead>
               <tr role="row">
                 <th width="5%" class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Id: activate to sort column descending">Id</th>
-                <th width="10%" class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Role Name: activate to sort column ascending">Role</th>
                 <th width="20%" class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Email: activate to sort column ascending">Email</th>
-                <th width="20%" class="sorting hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Name: activate to sort column ascending">Name</th>
-                <th width="15%" class="sorting hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Car License: activate to sort column ascending">Car License</th>
+                <th width="20%" class="sorting hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Balance: activate to sort column ascending">Balance</th>
+                <th width="15%" class="sorting hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Time: activate to sort column ascending">Time</th>
                 <th tabindex="0" aria-controls="example2" rowspan="1" colspan="2" aria-label="Action: activate to sort column ascending">Action</th>
               </tr>
             </thead>
             <tbody>
-            @foreach ($users as $user)
+            @foreach ($balance as $balances)
                 <tr role="row" class="odd">
-                  <td class="sorting_1">{{ $user->id_user }}</td>
-                  @foreach($user->roles as $role)
-                  <td class="hidden-xs" style="color:red;">{{ $role->role_name == 'Admin' || $role->role_name == 'Super Admin'?  $role->role_name : '' }}</td>
-                  @endforeach
-                  <td>{{ $user->email }}</td>
-                  <td>{{ $user->name }}</td>
-                  <td class="hidden-xs">{{ $user->license_plate_number }}</td>
+                  <td class="sorting_1">{{ $balances->id_balance }}</td>
+                  <td>{{ $balances->email }}</td>
+                  <td>{{ $balances->balance }}</td>
+                  <td class="hidden-xs">{{ $balances->updated_at }}</td>
                   <td>
-                    <form class="row" method="POST" action="{{ route('user-admin.destroy', ['id_user' => $user->id_user]) }}" onsubmit = "return confirm('Are you sure?')">
+                    <form class="row" method="POST" action="{{ route('balance-admin.destroy', ['id_balance' => $balances->id_balance]) }}" onsubmit = "return confirm('Are you sure?')">
                         <input type="hidden" name="_method" value="DELETE">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <a href="{{ route('user-admin.edit', ['id_user' => $user->id_user]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
+                        <a href="{{ route('balance-admin.edit', ['id_balance' => $balances->id_balance]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
                         Update
                         </a>
-                        @if ($user->email != Auth::user()->email)
+                        @if ($balances->email != Auth::user()->email)
                          <button type="submit" class="btn btn-danger col-sm-3 col-xs-5 btn-margin">
                           Delete
                         </button>
@@ -74,11 +69,11 @@
       </div>
       <div class="row">
         <div class="col-sm-5">
-          <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">Showing 1 to {{count($users)}} of {{count($users)}} entries</div>
+          <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">Showing 1 to {{count($balance)}} of {{count($balance)}} entries</div>
         </div>
         <div class="col-sm-7">
           <div class="dataTables_paginate paging_simple_numbers" id="example2_paginate">
-            {{ $users->links() }}
+            {{ $balance->links() }}
           </div>
         </div>
       </div>

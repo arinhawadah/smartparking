@@ -19,20 +19,24 @@ class UserController extends Controller
     //     $this->middleware('jwt.auth', ['only' => ['showUserbyId']]);
     // }
 
-    public function users(Request $request, User $user)
+    public function index(Request $request, User $user)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
         // $users = $user->all();
-        $users = User::paginate(10);
+        // $users = User::whereHas('roles', function($q)
+        // {
+        //     $q->whereIn('role_name', ['Admin', 'Super Admin']);
+        // })->paginate(10);
+        $users = User::with('roles')->paginate(10);
         
-        if ($request->wantsJson())
-        {
-        return fractal()
-        ->collection($users)
-        ->transformWith(new UserCredentialTransformer)
-        ->toArray();
-        }
+        // if ($request->wantsJson())
+        // {
+        // return fractal()
+        // ->collection($users)
+        // ->transformWith(new UserCredentialTransformer)
+        // ->toArray();
+        // }
 
         return view('users-mgmt/index', ['users' => $users]);
     }
@@ -50,7 +54,7 @@ class UserController extends Controller
         return response()->json([$user->name, $user->email]);
     }
 
-    public function updateProfile(Request $request, User $user, $id_user)
+    public function update(Request $request, User $user, $id_user)
     {
         $user = User::findOrFail($id_user);
         $constraints = [
@@ -82,10 +86,10 @@ class UserController extends Controller
         ->toArray();
         }
 
-        return redirect()->intended('admin/showuser');
+        return redirect()->intended('/user-admin');
     }
 
-    public function deleteUser(Request $request, User $user, $id_user)
+    public function destroy(Request $request, User $user, $id_user)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
@@ -93,11 +97,12 @@ class UserController extends Controller
         UserPark::where('id_user', $id_user)->delete();
         User::where('id_user', $id_user)->delete();
 
-        return response()->json('Delete User Success');
+        // return response()->json('Delete User Success');
+        return redirect()->intended('/user-admin');
     }
 
     //search user by id
-    public function showUserbyId(Request $request, User $user, $id_user)
+    public function edit(Request $request, User $user, $id_user)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
@@ -151,13 +156,13 @@ class UserController extends Controller
         return $query->paginate(10);
     }
 
-     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return view('users-mgmt/create');
+    }
+
+    public function createUser()
+    {
+        return view('users-mgmt/createuser');
     }
 }

@@ -1,4 +1,4 @@
-@extends('users-mgmt.base')
+@extends('report.base')
 
 @section('action-content')
 <div class="container">
@@ -7,9 +7,8 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Update Password</div>
                 <div class="panel-body">
-                    <form class="form-horizontal" role="form" method="POST" action="{{ route('user-admin.update', ['id_user' => $user->id_user]) }}">
+                    <form class="form-horizontal" role="form" method="POST" action="{{ route('update-user', ['id_user' => $user->id_user]) }}">
                     {{ csrf_field() }}
-                    <input type="hidden" name="_method" value="PATCH">
                         <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
                             <label for="password" class="col-md-4 control-label">New Password</label>
 

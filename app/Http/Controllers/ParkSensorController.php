@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\ParkSensor;
-use App\ParkSensorResp;
+use App\ParkSensorResponse;
 use App\CarParkSlot;
 use App\Http\Requests;
 use Illuminate\Http\Request;
@@ -10,21 +10,51 @@ use App\Transformers\ParkSensorTransformer;
 
 class ParkSensorController extends Controller
 {
-    public function __construct()
+    // public function __construct()
+    // {
+    //     $this->middleware('jwt.auth', ['only' => ['deleteParkSensor']]);
+    // }
+
+    public function create()
     {
-        $this->middleware('jwt.auth', ['only' => ['deleteParkSensor']]);
+        return view('sensor-mgmt/create');
+    }
+
+    // add new sensor or update sensor status
+    public function store(Request $request, ParkSensor $park_sensor)
+    {
+        $this->validate($request, [
+            'id_sensor' => 'required|unique:park_sensors',
+            'status'=> 'required',
+        ]);
+
+        $park_sensor = $park_sensor->create([
+            'id_sensor' => $request->id_sensor,
+            'status' => $request->status,
+            'time' => now()]
+        );
+        
+        return redirect()->intended('/sensor-admin');
+    }
+
+    // get all sensor
+    public function index(Request $request, ParkSensor $park_sensor)
+    {
+        $park_sensor = $park_sensor->paginate($park_sensor->count());
+
+        return view('sensor-mgmt/index', ['slot' => $park_sensor]);
     }
 
     // delete park_sensor
-    public function deleteParkSensor(Request $request, $id_sensor)
+    public function destroy(Request $request, $id_sensor)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
         // CarParkSlotDump::where('id_sensor', $id_sensor)->delete();
         ParkSensor::where('id_sensor', $id_sensor)->delete();
-        ParkSensorResp::where('id_sensor', $id_sensor)->delete();
+        ParkSensorResponse::where('id_sensor', $id_sensor)->delete();
 
-        return response()->json('Delete Success');
+        return redirect()->intended('/sensor-admin');
     }
 
     //get status from database
@@ -35,5 +65,27 @@ class ParkSensorController extends Controller
         ->first();
 
         return $sensor_status;
+    }
+
+    //search sensor by id_sensor
+    public function edit(Request $request, $entry)
+    {
+        $sensor = ParkSensor::findOrFail($entry);
+        
+        return view('sensor-mgmt/edit', ['sensor' => $sensor]);
+    }
+
+    // update sensor status
+    public function update(Request $request, $entry)
+    {
+        $this->validate($request, [
+            'status'=> 'required',
+        ]);
+
+        $input = ['status' => $request->status];
+
+        $park_sensor = ParkSensor::where('entry', $entry)->update($input);
+        
+        return redirect()->intended('/sensor-admin');
     }
 }

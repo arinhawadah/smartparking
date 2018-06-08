@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ParkSensorResp extends Model
+class ParkSensorResponse extends Model
 {
     public $timestamps = false;
 

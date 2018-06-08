@@ -7,8 +7,9 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Update Reservation User {{$user->id_user}}</div>
                 <div class="panel-body">
-                <form class="form-horizontal" role="form" method="POST" action="{{ route('update-reservation', ['id_user_park' => $user->id_user_park]) }}">
+                <form class="form-horizontal" role="form" method="POST" action="{{ route('reservation-admin.update', ['id_user_park' => $user->id_user_park]) }}">
                     {{ csrf_field() }}
+                    <input type="hidden" name="_method" value="PATCH">
                     <div class="form-group">
                             <label class="col-md-4 control-label">Slot Name</label>
                             <div class="col-md-6">

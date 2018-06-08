@@ -52,10 +52,10 @@
                   <td class="hidden-xs">{{ $user->leaving_time }}</td>
                   <td class="hidden-xs">Rp {{ $user->price }}</td>
                   <td>
-                    <form class="row" method="POST" action="{{ route('delete-reservation', ['id_user_park' => $user->id_user_park]) }}" onsubmit = "return confirm('Are you sure?')">
+                    <form class="row" method="POST" action="{{ route('reservation-admin.destroy', ['id_user_park' => $user->id_user_park]) }}" onsubmit = "return confirm('Are you sure?')">
                         <input type="hidden" name="_method" value="DELETE">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <a href="{{ route('search-reservation', ['id_user_park' => $user->id_user_park]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
+                        <a href="{{ route('reservation-admin.edit', ['id_user_park' => $user->id_user_park]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
                         Update
                         </a>
                         @if ($user->email != Auth::user()->email)

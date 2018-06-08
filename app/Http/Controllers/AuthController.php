@@ -64,8 +64,12 @@ class AuthController extends Controller
         // ->toArray();
 
         // return response()->json($response, 201);
-
+        if($reqest->wantsJson())
+        {
         return response()->json('Register Success');
+        }
+
+        return view('users-mgmt/index', ['users' => $users]);
     }
 
     // register admin

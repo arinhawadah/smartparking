@@ -65,7 +65,7 @@ class updateSlotStatus extends Command
         ->leftJoin('car_park_slots','park_sensors.id_sensor','=','car_park_slots.id_sensor')
         ->where('car_park_slots.status','AVAILABLE')
         ->update(
-            ['park_sensors.status' => 1, 
+            ['park_sensors.status' => 0, 
             'time' => now(),
             ]
         );
@@ -74,7 +74,7 @@ class updateSlotStatus extends Command
         ->leftJoin('car_park_slots','park_sensors.id_sensor','=','car_park_slots.id_sensor')
         ->where('car_park_slots.status','PARKED')
         ->update(
-            ['park_sensors.status' => 3, 
+            ['park_sensors.status' => 1, 
             'time' => now(),
             ]
         );

@@ -7,71 +7,44 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Add new user</div>
                 <div class="panel-body">
-                    <form class="form-horizontal" role="form" method="POST" action="{{ route('reservation-admin') }}">
+                    <form class="form-horizontal" role="form" method="POST" action="{{ route('slot-admin.store') }}">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                            <label for="email" class="col-md-4 control-label">Email User</label>
+                    <div class="form-group{{ $errors->has('slot_name') ? ' has-error' : '' }}">
+                            <label for="slot_name" class="col-md-4 control-label">Slot Name</label>
 
                             <div class="col-md-6">
-                                <input id="email" type="text" class="form-control" name="email" value="{{ old('email') }}" required autofocus>
+                                <input id="slot_name" type="text" class="form-control" name="slot_name" value="{{ old('slot_name') }}" required>
 
-                                @if ($errors->has('email'))
+                                @if ($errors->has('slot_name'))
                                     <span class="help-block">
-                                        <strong>{{ $errors->first('email') }}</strong>
+                                        <strong>{{ $errors->first('slot_name') }}</strong>
                                     </span>
                                 @endif
                             </div>
                         </div>
-
                     <div class="form-group">
-                            <label class="col-md-4 control-label">Slot Name</label>
+                            <label class="col-md-4 control-label">Id Sensor</label>
                             <div class="col-md-6">
-                                <select class="form-control" name="id_slot">
-                                    @foreach ($slot as $slots)
-                                        <option value="{{$slots->id_slot}}" >{{$slots->slot_name}}</option>
+                                <select class="form-control" name="id_sensor">
+                                    @foreach ($sensor as $sensors)
+                                        <option value="{{$sensors->id_sensor}}" >{{$sensors->id_sensor}}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group{{ $errors->has('arrive_time') ? ' has-error' : '' }}">
-                            <label for="arrive_time" class="col-md-4 control-label">Arrival Time</label>
+                        <div class="form-group{{ $errors->has('status') ? ' has-error' : '' }}">
+                            <label for="status" class="col-md-4 control-label">Status</label>
 
                             <div class="col-md-6">
-                                <input id="arrive_time" type="text" class="form-control" name="arrive_time" value="{{ old('arrive_time') }}" required>
+                                <input id="status" type="text" class="form-control" name="status" value="{{ old('status') }}" required>
 
-                                @if ($errors->has('arrive_time'))
+                                @if ($errors->has('status'))
                                     <span class="help-block">
-                                        <strong>{{ $errors->first('arrive_time') }}</strong>
+                                        <strong>{{ $errors->first('status') }}</strong>
                                     </span>
                                 @endif
                             </div>
-                        </div>
-                        <div class="form-group{{ $errors->has('leaving_time') ? ' has-error' : '' }}">
-                            <label for="leaving_time" class="col-md-4 control-label">Leaving Time</label>
-
-                            <div class="col-md-6">
-                                <input id="leaving_time" type="text" class="form-control" name="leaving_time" value="{{ old('leaving_time') }}" required>
-
-                                @if ($errors->has('leaving_time'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('leaving_time') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="form-group{{ $errors->has('price') ? ' has-error' : '' }}">
-                            <label for="price" class="col-md-4 control-label">Price</label>
-
-                            <div class="col-md-6">
-                                <input id="price" type="price" class="form-control" name="price" value="{{ old('price') }}">
-
-                                @if ($errors->has('price'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('price') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>                        
+                        </div>            
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">
                                 <button type="submit" class="btn btn-primary">

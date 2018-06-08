@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use Illuminate\Http\Request;
 use App\CarParkSlot;
 // use App\CarParkSlotDump;
@@ -14,10 +15,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CarParkSlotController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('jwt.auth', ['only' => ['createParkSlot', 'deleteParkSlot']]);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('jwt.auth', ['only' => ['createParkSlot', 'deleteParkSlot']]);
+    // }
 
     // // get all park slot
     // public function cobacoba(CarParkSlot $car_park_slot)
@@ -38,7 +39,7 @@ class CarParkSlotController extends Controller
     // }
 
     // get all park slot
-    public function status(Request $request, CarParkSlot $car_park_slot)
+    public function index(Request $request, CarParkSlot $car_park_slot)
     {
         $car_park_slot = $car_park_slot->paginate($car_park_slot->count());
 
@@ -90,7 +91,7 @@ class CarParkSlotController extends Controller
                     ->whereDate('leaving_time', date('Y-m-d'))       
                     ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
                     ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
-                    // ->orWhere('status', 'AVAILABLE')
+                    ->orWhere('status', 'AVAILABLE') //tambahannya ini ya rinnn
                     ->select('car_park_slots.id_slot','car_park_slots.slot_name')
                     ->orderBy('car_park_slots.id_slot','asc')
                     // ->take(1)
@@ -147,7 +148,7 @@ class CarParkSlotController extends Controller
                 ->whereDate('leaving_time', date('Y-m-d'))       
                 ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
                 ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
-                // ->orWhere('status', 'AVAILABLE')
+                ->orWhere('status', 'AVAILABLE')
                 ->select('car_park_slots.id_slot','car_park_slots.slot_name')
                 ->orderBy('car_park_slots.id_slot','asc')
                 // ->take(1)
@@ -177,23 +178,58 @@ class CarParkSlotController extends Controller
     }
 
     // get status by time arrive
-    public function statusByTime(UserPark $user_park, $time)
+    public function slotByTime(UserPark $user_park, $time)
     {
+        // $user_park = $user_park
+        // ->whereDate('arrive_time','=', $time)
+        // ->orWhereTime('leaving_time','=', $time)
+        // ->get();
+
         $user_park = $user_park
-        ->whereTime('arrive_time','=', $time)
-        ->orWhereTime('leaving_time','=', $time)
-        ->get();
+        ->whereDay('arrive_time', $time)
+        ->whereDay('leaving_time', $time)
+        ->count();
 
-        return fractal()
-        ->collection($user_park)
-        ->transformWith(new UserParkTimeTransformer)
-        ->toArray();
-
-        return response()->json($response, 201);
+        return response()->json($user_park, 201);
     }
 
-    //search reservation by id_user_park
-    public function slotbyId(Request $request, $id_slot)
+    // get status by time arrive
+    public function allSlotByTime(UserPark $user_park)
+    {
+        $visitor_day = $user_park->select(DB::raw("COUNT(id_user_park) as count"))
+        ->groupBy(DB::raw('weekday(arrive_time)'))
+        ->get()->toArray();
+        
+        $visitor_day = array_column($visitor_day, 'count');
+
+        $visitor_time = $user_park->select(DB::raw("COUNT(id_user_park) as count"))
+        ->groupBy(DB::raw('time(arrive_time)'))
+        ->get()->toArray();
+        
+        $visitor_time = array_column($visitor_time, 'count');
+
+        $time = $user_park->select(DB::raw('hour(arrive_time) as time'))
+        ->groupBy('time')
+        ->get()->toArray();
+        
+        $time = array_column($time, 'time');
+
+        // $user_park = array_column($user_park, 'count');
+
+        // return fractal()
+        // ->collection($user_park)
+        // ->transformWith(new UserParkTimeTransformer)
+        // ->toArray();
+
+        // return response()->json($visitor_times);
+        return view('dashboard')
+            ->with('visitor_day',json_encode($visitor_day,JSON_NUMERIC_CHECK))
+            ->with('visitor_time',json_encode($visitor_time,JSON_NUMERIC_CHECK))
+            ->with('time',json_encode($time,JSON_NUMERIC_CHECK));
+    }
+
+    //search slot by id_user_park
+    public function edit(Request $request, $id_slot)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
@@ -203,8 +239,16 @@ class CarParkSlotController extends Controller
         return view('slot-mgmt/edit', ['slot' => $slot, 'sensor' => $sensor]);
     }
 
+    public function create()
+    {
+        $slot = CarParkSlot::all();
+        $sensor = ParkSensor::all();
+
+        return view('slot-mgmt/create', ['slot' => $slot, 'sensor' => $sensor]);
+    }
+
     // create new slot
-    public function createParkSlot(Request $request, CarParkSlot $car_park_slot)
+    public function store(Request $request, CarParkSlot $car_park_slot)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
@@ -223,36 +267,19 @@ class CarParkSlotController extends Controller
         // $slot_name = $request->slot_name;
         $input = $request->all();
 
-        // $slot = CarParkSlot::where('slot_name', $input['slot_name'])
-        // ->pluck('id_slot')
-        // ->first(); 
-
         $this->updateSensor($input);
         
         // $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
-
+        if ($request->wantsJson())
+        {
         return fractal()
         ->item($car_park_slot)
         ->transformWith(new CarParkSlotTransformer)
         ->toArray();
+        }
 
-        return response()->json($response, 201);
+        return redirect()->intended('/slot-admin');
     }
-
-    // // create table car_park_slot_dump
-    // private function createCarParkSlotDumps($slot, $input, $slot_name)
-    // {
-    //     $car_park_slot_dump = CarParkSlotDump::create(
-    //         [
-    //             'id_slot' => $slot,
-    //             'id_sensor' => $input['id_sensor'],
-    //             'status'  => $input['status'],
-    //             'slot_name' => $slot_name,
-    //         ]
-    //     );
-
-    //     return $car_park_slot_dump;
-    // }
 
     // update status park_sensor
     private function updateSensor($input)
@@ -272,11 +299,11 @@ class CarParkSlotController extends Controller
     }
 
     // update status car_park_slot
-    public function updateParkSlot(Request $request, CarParkSlot $car_park_slot, $id_slot)
+    public function update(Request $request, CarParkSlot $car_park_slot, $id_slot)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        $car_park_slot = CarParkSlot::where($id_slot);
+        // $car_park_slot = CarParkSlot::where($id_slot);
         
         $constraints = [
             'status' => 'required',
@@ -303,19 +330,33 @@ class CarParkSlotController extends Controller
             ->toArray();
         }
 
-        return redirect()->intended('admin/carparkslot');
+        return redirect()->intended('/slot-admin');
 
     }
 
     // delete car_park_slot
-    public function deleteParkSlot(Request $request, $id_slot)
+    public function destroy(Request $request, $id_slot)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
         // CarParkSlotDump::where('id_slot', $id_slot)->delete();
         CarParkSlot::where('id_slot', $id_slot)->delete();
 
-        return response()->json('Delete Success');
+        return redirect()->intended('/slot-admin');
     }
 
+    // // create table car_park_slot_dump
+    // private function createCarParkSlotDumps($slot, $input, $slot_name)
+    // {
+    //     $car_park_slot_dump = CarParkSlotDump::create(
+    //         [
+    //             'id_slot' => $slot,
+    //             'id_sensor' => $input['id_sensor'],
+    //             'status'  => $input['status'],
+    //             'slot_name' => $slot_name,
+    //         ]
+    //     );
+
+    //     return $car_park_slot_dump;
+    // }
 }
