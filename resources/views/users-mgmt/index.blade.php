@@ -9,8 +9,12 @@
           <h3 class="box-title">List of users</h3>
         </div>
         <div class="col-sm-4">
+          @if (Auth::user()->roles()->pluck('role_name')->first() == 'Super Admin')
           <a class="btn btn-primary" href="{{ url('admin/createuser') }}">Add new user</a>
           <a class="btn btn-primary" href="{{ route('user-admin.create') }}">Add new admin</a>
+          @else
+          <a class="btn btn-primary" href="{{ url('admin/createuser') }}">Add new user</a>
+          @endif
         </div>
     </div>
   </div>
@@ -45,10 +49,10 @@
             <tbody>
             @foreach ($users as $user)
                 <tr role="row" class="odd">
+                @foreach($user->roles as $role)
+                  @if (Auth::user()->roles()->pluck('role_name')->first() == 'Super Admin')
                   <td class="sorting_1">{{ $user->id_user }}</td>
-                  @foreach($user->roles as $role)
-                  <td class="hidden-xs" style="color:red;">{{ $role->role_name == 'Admin' || $role->role_name == 'Super Admin'?  $role->role_name : '' }}</td>
-                  @endforeach
+                  <td class="hidden-xs" style="color:red;">{{ $role->role_name != 'User'?  $role->role_name : '' }}</td>
                   <td>{{ $user->email }}</td>
                   <td>{{ $user->name }}</td>
                   <td class="hidden-xs">{{ $user->license_plate_number }}</td>
@@ -66,6 +70,31 @@
                         @endif
                     </form>
                   </td>
+
+                  @elseif (Auth::user()->roles()->pluck('role_name')->first() == 'Admin')
+                    @if ($role->role_name == 'User')
+                      <td class="sorting_1">{{ $user->id_user }}</td>
+                      <td class="hidden-xs" style="color:red;">{{ $role->role_name}}</td>
+                      <td>{{ $user->email }}</td>
+                      <td>{{ $user->name }}</td>
+                      <td class="hidden-xs">{{ $user->license_plate_number }}</td>
+                      <td>
+                      <form class="row" method="POST" action="{{ route('user-admin.destroy', ['id_user' => $user->id_user]) }}" onsubmit = "return confirm('Are you sure?')">
+                          <input type="hidden" name="_method" value="DELETE">
+                          <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                          <a href="{{ route('user-admin.edit', ['id_user' => $user->id_user]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
+                          Update
+                          </a>
+                          @if ($user->email != Auth::user()->email)
+                            <button type="submit" class="btn btn-danger col-sm-3 col-xs-5 btn-margin">
+                            Delete
+                            </button>
+                          @endif
+                      </form>
+                      </td>
+                    @endif
+                  @endif
+                @endforeach
               </tr>
             @endforeach
             </tbody>

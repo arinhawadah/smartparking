@@ -37,7 +37,7 @@
                             <label for="arrive_time" class="col-md-4 control-label">Arrival Time</label>
 
                             <div class="col-md-6">
-                                <input id="arrive_time" type="text" class="form-control" name="arrive_time" value="{{ old('arrive_time') }}" required>
+                                <input id="arrive_time" type="datetime-local" class="form-control" name="arrive_time" value="{{ old('arrive_time') }}" required>
 
                                 @if ($errors->has('arrive_time'))
                                     <span class="help-block">
@@ -50,7 +50,7 @@
                             <label for="leaving_time" class="col-md-4 control-label">Leaving Time</label>
 
                             <div class="col-md-6">
-                                <input id="leaving_time" type="text" class="form-control" name="leaving_time" value="{{ old('leaving_time') }}" required>
+                                <input id="leaving_time" type="datetime-local" class="form-control" name="leaving_time" value="{{ old('leaving_time') }}" required>
 
                                 @if ($errors->has('leaving_time'))
                                     <span class="help-block">

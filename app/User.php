@@ -24,7 +24,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'unique_id','name', 'email', 'password', 'car_type','license_plate_number','activation_token','token'
+        'unique_id','name', 'email', 'password', 'car_type','license_plate_number','token'
     ];
 
     /**
@@ -33,7 +33,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password','activation_token','remember_token'
+        'password','remember_token'
     ];
 
     public function roles()

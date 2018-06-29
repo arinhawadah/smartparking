@@ -16,6 +16,7 @@
         </div>
       </div>      
       <!-- sidebar menu: : style can be found in sidebar.less -->
+      @if (Auth::user()->roles()->pluck('role_name')->first() != 'User')
       <ul class="sidebar-menu">
         <li class="header">MAIN NAVIGATION</li>
         <li class="active"><a href="{{ route('allslot') }}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
@@ -34,7 +35,7 @@
             <li><a href="{{ route('balance-admin.index') }}">User Balance</a></li>
           </ul>
         </li>
-        <li>
+        <!-- <li>
           <a href="{{ url('/calendar') }}">
             <i class="fa fa-calendar"></i> <span>Calendar</span>
           </a>
@@ -57,8 +58,9 @@
             <li><a href="../examples/blank.html"><i class="fa fa-circle-o"></i> Blank Page</a></li>
             <li><a href="../examples/pace.html"><i class="fa fa-circle-o"></i> Pace Page</a></li>
           </ul>
-        </li>
+        </li> -->
       </ul>
+      @endif
     </section>
     <!-- /.sidebar -->
   </aside>

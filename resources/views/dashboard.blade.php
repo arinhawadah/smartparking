@@ -122,9 +122,28 @@ desired effect
 
       <div class="row">
         <div class="col-md-6">
+          <!-- BAR CHART -->
+          <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title">Bar Chart</h3>
+
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>
+            <div class="box-body">
+              <div class="chart">
+                <canvas id="barChart" style="height:230px"></canvas>
+              </div>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
 
           <!-- Donut chart -->
-          <div class="box box-primary">
+          <!-- <div class="box box-primary">
             <div class="box-header with-border">
               <i class="fa fa-bar-chart-o"></i>
 
@@ -138,19 +157,18 @@ desired effect
             </div>
             <div class="box-body">
               <div id="donut-chart" style="height: 300px;"></div>
-            </div>
+            </div> -->
             <!-- /.box-body-->
-          </div>
+          <!-- </div> -->
           <!-- /.box -->
+
         </div>
         <!-- /.col -->
 
         <div class="col-md-6">
-          <!-- Bar chart -->
+        <!-- BAR CHART -->
           <div class="box box-primary">
             <div class="box-header with-border">
-              <i class="fa fa-bar-chart-o"></i>
-
               <h3 class="box-title">Bar Chart</h3>
 
               <div class="box-tools pull-right">
@@ -160,9 +178,11 @@ desired effect
               </div>
             </div>
             <div class="box-body">
-              <div id="bar-chart" style="height: 300px;"></div>
+              <div class="chart">
+                <canvas id="barChart-1" style="height:230px"></canvas>
+              </div>
             </div>
-            <!-- /.box-body-->
+            <!-- /.box-body -->
           </div>
           <!-- /.box -->
         </div>
@@ -208,6 +228,12 @@ desired effect
 <!-- Page script -->
 <script>
   $(function () {
+    var data_visitor_time = <?php echo $visitor_time; ?>;
+    var data_visitor_day = <?php echo $visitor_day; ?>;
+    var data_visitor_month = <?php echo $visitor_month; ?>;
+    var data_day = <?php echo $day; ?>;
+    var data_month = <?php echo $month; ?>;
+    var data_time = <?php echo $time; ?>;
     //--------------
     //- AREA CHART -
     //--------------
@@ -216,22 +242,10 @@ desired effect
     var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
     // This will get the first returned node in the jQuery collection.
     var areaChart = new Chart(areaChartCanvas);
-    var data_visitor_time = <?php echo $visitor_time; ?>;
-    var data_visitor_day = <?php echo $visitor_day; ?>;
-    var data_time = <?php echo $time; ?>;
+
     var areaChartData = {
       labels: data_time,
       datasets: [
-        // {
-        //   label: "Electronics",
-        //   fillColor: "rgba(210, 214, 222, 1)",
-        //   strokeColor: "rgba(210, 214, 222, 1)",
-        //   pointColor: "rgba(210, 214, 222, 1)",
-        //   pointStrokeColor: "#c1c7d1",
-        //   pointHighlightFill: "#fff",
-        //   pointHighlightStroke: "rgba(220,220,220,1)",
-        //   data: data_visitor,
-        // },
         {
           label: "Digital Goods",
           fillColor: "rgba(60,141,188,0.9)",
@@ -286,67 +300,201 @@ desired effect
 
     //Create the line chart
     areaChart.Line(areaChartData, areaChartOptions);
+  
+    //   /*
+    //  * BAR CHART
+    //  * ---------
+    //  */
 
-    /*
-     * DONUT CHART
-     * -----------
-     */
-
-    var donutData = [
-      {label: "Series2", data: 30, color: "#3c8dbc"},
-      {label: "Series3", data: 20, color: "#0073b7"},
-      {label: "Series4", data: 50, color: "#00c0ef"}
-    ];
-    $.plot("#donut-chart", donutData, {
-      series: {
-        pie: {
-          show: true,
-          radius: 1,
-          innerRadius: 0.5,
-          label: {
-            show: true,
-            radius: 2 / 3,
-            formatter: labelFormatter,
-            threshold: 0.1
-          }
-
+    // var bar_data = {
+    //   data: [[data_month[0], data_visitor_month[0]], [data_month[1], data_visitor_month[1]], [data_month[2], data_visitor_month[2]], [data_month[3], data_visitor_month[3]], [data_month[4], data_visitor_month[4]], [data_month[5], data_visitor_month[5]], 
+    //   [data_month[6], data_visitor_month[6]], [data_month[7], data_visitor_month[7]], [data_month[8], data_visitor_month[8]], [data_month[9], data_visitor_month[9]], [data_month[10], data_visitor_month[10]], [data_month[11], data_visitor_month[11]]],
+    //   color: "#3c8dbc"
+    // };
+    // $.plot("#bar-chart-2", [bar_data], {
+    //   grid: {
+    //     borderWidth: 1,
+    //     borderColor: "#f3f3f3",
+    //     tickColor: "#f3f3f3",
+    //   },
+    //   series: {
+    //     bars: {
+    //       show: true,
+    //       barWidth: 0.5,
+    //       align: "center"
+    //     }
+    //   },
+    //   xaxis: {
+    //     mode: "categories",
+    //     tickLength: 0
+    //   }
+    // });
+    // /* END BAR CHART */
+    
+    //-------------
+    //- BAR CHART -
+    //-------------
+    var barChartCanvas = $("#barChart").get(0).getContext("2d");
+    var barChart = new Chart(barChartCanvas);
+    var barChartData = {
+      labels: data_month,
+      datasets: [
+        {
+          label: "Digital Goods",
+          fillColor: "#99bbff",
+          strokeColor: "#99bbff",
+          pointColor: "#99bbff",
+          pointStrokeColor: "rgba(60,141,188,1)",
+          pointHighlightFill: "#fff",
+          pointHighlightStroke: "rgba(60,141,188,1)",
+          data: data_visitor_month
         }
-      },
-      legend: {
-        show: false
-      }
-    });
-    /*
-     * END DONUT CHART
-     */
-    /*
-     * BAR CHART
-     * ---------
-     */
-
-    var bar_data = {
-      data: [["Monday", data_visitor_day[0]], ["Tuesday", data_visitor_day[1]], ["Wednesday", data_visitor_day[2]], ["Thursday", data_visitor_day[3]], ["Friday", data_visitor_day[4]], ["Saturday", data_visitor_day[5]], ["Sunday", data_visitor_day[6]]],
-      color: "#3c8dbc"
+      ]
     };
-    $.plot("#bar-chart", [bar_data], {
-      grid: {
-        borderWidth: 1,
-        borderColor: "#f3f3f3",
-        tickColor: "#f3f3f3"
-      },
-      series: {
-        bars: {
-          show: true,
-          barWidth: 0.5,
-          align: "center"
+    var barChartOptions = {
+      //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+      scaleBeginAtZero: true,
+      //Boolean - Whether grid lines are shown across the chart
+      scaleShowGridLines: true,
+      //String - Colour of the grid lines
+      scaleGridLineColor: "rgba(0,0,0,.05)",
+      //Number - Width of the grid lines
+      scaleGridLineWidth: 1,
+      //Boolean - Whether to show horizontal lines (except X axis)
+      scaleShowHorizontalLines: true,
+      //Boolean - Whether to show vertical lines (except Y axis)
+      scaleShowVerticalLines: true,
+      //Boolean - If there is a stroke on each bar
+      barShowStroke: true,
+      //Number - Pixel width of the bar stroke
+      barStrokeWidth: 2,
+      //Number - Spacing between each of the X value sets
+      barValueSpacing: 5,
+      //Number - Spacing between data sets within X values
+      barDatasetSpacing: 1,
+      //String - A legend template
+      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
+      //Boolean - whether to make the chart responsive
+      responsive: true,
+      maintainAspectRatio: true
+    };
+
+    barChartOptions.datasetFill = false;
+    barChart.Bar(barChartData, barChartOptions);
+
+    // /*
+    //  * DONUT CHART
+    //  * -----------
+    //  */
+
+    // var donutData = [
+    //   {label: "Series2", data: 30, color: "#3c8dbc"},
+    //   {label: "Series3", data: 20, color: "#0073b7"},
+    //   {label: "Series4", data: 50, color: "#00c0ef"}
+    // ];
+    // $.plot("#donut-chart", donutData, {
+    //   series: {
+    //     pie: {
+    //       show: true,
+    //       radius: 1,
+    //       innerRadius: 0.5,
+    //       label: {
+    //         show: true,
+    //         radius: 2 / 3,
+    //         formatter: labelFormatter,
+    //         threshold: 0.1
+    //       }
+
+    //     }
+    //   },
+    //   legend: {
+    //     show: false
+    //   }
+    // });
+    // /*
+    //  * END DONUT CHART
+    //  */
+
+    // /*
+    //  * BAR CHART
+    //  * ---------
+    //  */
+
+    // var bar_data = {
+    //   data: [[data_day[0], data_visitor_day[0]], [data_day[1], data_visitor_day[1]], [data_day[2], data_visitor_day[2]], [data_day[3], data_visitor_day[3]], [data_day[4], data_visitor_day[4]], [data_day[5], data_visitor_day[5]], 
+    //   [data_day[6], data_visitor_day[6]]],
+    //   color: "#3c8dbc"
+    // };
+    // $.plot("#bar-chart", [bar_data], {
+    //   grid: {
+    //     borderWidth: 1,
+    //     borderColor: "#f3f3f3",
+    //     tickColor: "#f3f3f3"
+    //   },
+    //   series: {
+    //     bars: {
+    //       show: true,
+    //       barWidth: 0.5,
+    //       align: "center"
+    //     }
+    //   },
+    //   xaxis: {
+    //     mode: "categories",
+    //     tickLength: 0
+    //   }
+    // });
+    // /* END BAR CHART */
+
+    //-------------
+    //- BAR CHART -
+    //-------------
+    var barChartCanvas = $("#barChart-1").get(0).getContext("2d");
+    var barChart = new Chart(barChartCanvas);
+    var barChartData = {
+      labels: data_day,
+      datasets: [
+        {
+          label: "Digital Goods",
+          fillColor: "#99bbff",
+          strokeColor: "#99bbff",
+          pointColor: "#99bbff",
+          pointStrokeColor: "rgba(60,141,188,1)",
+          pointHighlightFill: "#fff",
+          pointHighlightStroke: "rgba(60,141,188,1)",
+          data: data_visitor_day
         }
-      },
-      xaxis: {
-        mode: "categories",
-        tickLength: 0
-      }
-    });
-    /* END BAR CHART */
+      ]
+    };
+    var barChartOptions = {
+      //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+      scaleBeginAtZero: true,
+      //Boolean - Whether grid lines are shown across the chart
+      scaleShowGridLines: true,
+      //String - Colour of the grid lines
+      scaleGridLineColor: "rgba(0,0,0,.05)",
+      //Number - Width of the grid lines
+      scaleGridLineWidth: 1,
+      //Boolean - Whether to show horizontal lines (except X axis)
+      scaleShowHorizontalLines: true,
+      //Boolean - Whether to show vertical lines (except Y axis)
+      scaleShowVerticalLines: true,
+      //Boolean - If there is a stroke on each bar
+      barShowStroke: true,
+      //Number - Pixel width of the bar stroke
+      barStrokeWidth: 2,
+      //Number - Spacing between each of the X value sets
+      barValueSpacing: 5,
+      //Number - Spacing between data sets within X values
+      barDatasetSpacing: 1,
+      //String - A legend template
+      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
+      //Boolean - whether to make the chart responsive
+      responsive: true,
+      maintainAspectRatio: true
+    };
+
+    barChartOptions.datasetFill = false;
+    barChart.Bar(barChartData, barChartOptions);
 
   });
 

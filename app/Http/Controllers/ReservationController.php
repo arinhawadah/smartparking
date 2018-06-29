@@ -7,6 +7,7 @@ use App\CarParkSlot;
 use App\UserPark;
 use App\ParkSensor;
 use App\User;
+use App\UserBalance;
 use App\HistoryTransaction;
 use Auth;
 use JWTAuth;
@@ -29,7 +30,7 @@ class ReservationController extends Controller
 
     public function index(Request $request, UserPark $user_park)
     {
-        // $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
         // $users = $user->all();
 
@@ -64,20 +65,38 @@ class ReservationController extends Controller
         ]);
 
         $id_slot = $request->id_slot;
+        $price = $request->price;
 
         $check_sensor = CarParkSlot::where('id_slot', $id_slot)->select('id_sensor')->first();
 
         if($check_sensor['id_sensor'] == null){
             return response()->json('Your slot have not registered yet');
         }
-                    
+
+        $old_balance = UserBalance::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->pluck('balance')->first();
+
+        $new_balance = $old_balance - $price;
+
+        $input = [
+            'balance' =>  $new_balance,
+            ];
+
+        if($new_balance < 20000)
+        {
+            return response()->json(['error' => 'Insufficient balance'], 402);
+        }
+
+        UserBalance::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->update($input);
+        
+        // $this->updateBalance($price);
+
         $user_park = $user_park->create([
             'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
             'id_slot_user_park' => $request->id_slot,
             'unique_id' => Auth::user()->unique_id, 
             'arrive_time' => date('Y-m-d').' '.$request->arrive_time,
             'leaving_time' => date('Y-m-d').' '.$request->leaving_time,
-            'price' => $request->price,
+            'price' => $price,
         ]);
 
         $this->historyTransaction($user_park);
@@ -100,6 +119,7 @@ class ReservationController extends Controller
         ]);
 
         $id_slot = $request->id_slot;
+        $price = $request->price;
         
         $user = $user->where('email','=', $request->email)->select('id_user','unique_id')->first();
 
@@ -108,6 +128,21 @@ class ReservationController extends Controller
         if($check_sensor['id_sensor'] == null){
             return response()->json('Your slot have not registered yet');
         }
+
+        $old_balance = UserBalance::where('id_user', $user['id_user'])->pluck('balance')->first();
+
+        $new_balance = $old_balance - $price;
+
+        $input = [
+            'balance' =>  $new_balance,
+            ];
+
+        if($new_balance < 20000)
+        {
+            return response()->json(['error' => 'Insufficient balance'], 402);
+        }
+
+        UserBalance::where('id_user', $user['id_user'])->update($input);
 
         $user_park = $user_park->create([
             'id_user' => $user->id_user,
@@ -152,7 +187,7 @@ class ReservationController extends Controller
     // update reservation for admin
     public function update(Request $request, UserPark $user_park, $id_user_park)
     {
-            $user_park = UserPark::findOrFail($id_user_park);
+            $old_user_park = UserPark::findOrFail($id_user_park);
     
             $constraints = [
                 'id_slot' => 'required',
@@ -162,9 +197,32 @@ class ReservationController extends Controller
                 ];
     
             $id_slot = $request->id_slot;
+            $price = $request->price;
             $update = $request->except('id_slot');
     
             $this->validate($request, $constraints);
+
+            $old_balance = UserBalance::where('id_user', $old_user_park['id_user'])->pluck('balance')->first();
+
+            if($price != $old_user_park['price'])
+            {
+                $new_balance = ($old_balance + $old_user_park['price']) - $price;
+            }
+            else
+            {
+                $new_balance = $old_balance;
+            }
+    
+            $input = [
+                'balance' =>  $new_balance,
+                ];
+    
+            if($new_balance < 20000)
+            {
+                return redirect()->back()->with('errors', 'The given data was invalid.');
+            }
+    
+            UserBalance::where('id_user', $old_user_park['id_user'])->update($input);   
     
             $user_park = $user_park->where('id_user_park', $id_user_park)
             ->update(
@@ -280,6 +338,26 @@ class ReservationController extends Controller
         $querys = $query->count();
         return $query->paginate($querys);
     }
+
+    // private function updateBalance($price)
+    // {
+    //     $old_balance = UserBalance::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->pluck('balance')->first();
+
+    //     $new_balance = $old_balance - $price;
+
+    //     $input = [
+    //         'balance' =>  $new_balance,
+    //         ];
+
+    //     if($new_balance < 0)
+    //     {
+    //         return response()->json(['error' => 'Insufficient balance']);
+    //     }
+    //     UserBalance::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->update($input);
+
+    //     return;
+    // }
+
 
     // // update status car_park_slot
     // private function updateStatus($id_slot)

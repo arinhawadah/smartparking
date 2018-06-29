@@ -21,8 +21,8 @@ Route::get('/calendar', function () {
 
 Auth::routes();
 
-// Route::get('auth/activate', 'Auth\ActivationController@activate')->name('auth.activate');
-// Route::get('auth/resetpassword', 'Auth\ResetPasswordController@resetpassword')->name('auth.resetpassword');
+Route::get('auth/activate', 'Auth\ActivationController@activate')->name('auth.activate');
+Route::get('auth/resetpassword', 'Auth\ResetPasswordController@resetpassword')->name('auth.resetpassword');
 // Route::get('/home', 'HomeController@index')->name('home');
 
 Route::resource('sensor-admin', 'ParkSensorController');
@@ -39,7 +39,7 @@ Route::resource('slot-admin', 'CarParkSlotController');
 // Route::post('admin/addslot', 'CarParkSlotController@createParkSlot')->name('create-slot');
 // Route::delete('admin/deleteslot/{slot_name}','CarParkSlotController@deleteParkSlot')->name('delete-slot');
 Route::get('admin/carparkslot/{time}','CarParkSlotController@slotByTime');
-Route::get('admin/allslot','CarParkSlotController@allSlotByTime')->name('allslot');
+Route::get('admin/allslot','DashboardController@allSlotByTime')->name('allslot');
 
 Route::resource('user-admin', 'UserController');
 Route::get('admin/profile','UserController@profile');
@@ -60,6 +60,7 @@ Route::post('admin/showname','ReservationController@showReservationbyUser')->nam
 
 Route::post('auth/admin/register', 'AuthController@registerAdmin')->name('register-admin');
 Route::post('auth/user/register','AuthController@register')->name('register-user');
+// Route::post('auth/user/resetpassword','AuthController@ResetPassword')->name('reset-password');
 
 Route::resource('balance-admin', 'UserBalanceController');
 Route::post('balance-admin/search', 'UserBalanceController@search')->name('balance-search');

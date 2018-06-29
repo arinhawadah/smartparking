@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 //user
 Route::post('auth/user/register','AuthController@register');
 Route::post('auth/login','AuthController@login');
-Route::post('auth/user/resetpassword','AuthController@ResetPassword'); //reset password
+Route::post('auth/user/resetpassword','AuthController@ResetPassword')->name('reset-password');
 // Route::get('users/profile','UserController@profile')->middleware('cors');
 Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
 Route::post('addreservation','ReservationController@addReservation')->middleware('cors');
@@ -30,6 +30,9 @@ Route::get('carparkslot','CarParkSlotController@index');
 Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@statusAvailableSlot');
 Route::get('carparkslot/{id_user_park}','CarParkSlotController@statusById');
 Route::get('history/{id_user}','HistoryController@historybyId');
+Route::get('updatecharge/{id_user}','UserBalanceController@updateUserCharge');
+Route::get('balance/{id_user}','UserBalanceController@show');
+
 
 // Route::get('cobacoba','CarParkSlotController@cobacoba');
 

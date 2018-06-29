@@ -41,6 +41,8 @@ class CarParkSlotController extends Controller
     // get all park slot
     public function index(Request $request, CarParkSlot $car_park_slot)
     {
+        // $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
         $car_park_slot = $car_park_slot->paginate($car_park_slot->count());
 
         if ($request->wantsJson())
@@ -91,7 +93,9 @@ class CarParkSlotController extends Controller
                     ->whereDate('leaving_time', date('Y-m-d'))       
                     ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
                     ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
-                    ->orWhere('status', 'AVAILABLE') //tambahannya ini ya rinnn
+                    ->orWhere('arrive_time', NULL)
+                    ->orWhere('leaving_time', NULL)
+                    // ->orWhere('status', 'AVAILABLE')
                     ->select('car_park_slots.id_slot','car_park_slots.slot_name')
                     ->orderBy('car_park_slots.id_slot','asc')
                     // ->take(1)
@@ -148,7 +152,9 @@ class CarParkSlotController extends Controller
                 ->whereDate('leaving_time', date('Y-m-d'))       
                 ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
                 ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
-                ->orWhere('status', 'AVAILABLE')
+                ->orWhere('arrive_time', NULL)
+                ->orWhere('leaving_time', NULL)
+                // ->orWhere('status', 'AVAILABLE')
                 ->select('car_park_slots.id_slot','car_park_slots.slot_name')
                 ->orderBy('car_park_slots.id_slot','asc')
                 // ->take(1)
@@ -191,41 +197,6 @@ class CarParkSlotController extends Controller
         ->count();
 
         return response()->json($user_park, 201);
-    }
-
-    // get status by time arrive
-    public function allSlotByTime(UserPark $user_park)
-    {
-        $visitor_day = $user_park->select(DB::raw("COUNT(id_user_park) as count"))
-        ->groupBy(DB::raw('weekday(arrive_time)'))
-        ->get()->toArray();
-        
-        $visitor_day = array_column($visitor_day, 'count');
-
-        $visitor_time = $user_park->select(DB::raw("COUNT(id_user_park) as count"))
-        ->groupBy(DB::raw('time(arrive_time)'))
-        ->get()->toArray();
-        
-        $visitor_time = array_column($visitor_time, 'count');
-
-        $time = $user_park->select(DB::raw('hour(arrive_time) as time'))
-        ->groupBy('time')
-        ->get()->toArray();
-        
-        $time = array_column($time, 'time');
-
-        // $user_park = array_column($user_park, 'count');
-
-        // return fractal()
-        // ->collection($user_park)
-        // ->transformWith(new UserParkTimeTransformer)
-        // ->toArray();
-
-        // return response()->json($visitor_times);
-        return view('dashboard')
-            ->with('visitor_day',json_encode($visitor_day,JSON_NUMERIC_CHECK))
-            ->with('visitor_time',json_encode($visitor_time,JSON_NUMERIC_CHECK))
-            ->with('time',json_encode($time,JSON_NUMERIC_CHECK));
     }
 
     //search slot by id_user_park
@@ -286,10 +257,15 @@ class CarParkSlotController extends Controller
     {
         if($input['status'] == 'AVAILABLE'){
             $park_sensor = ParkSensor::where('id_sensor',$input['id_sensor'])->update(
+                ['status' => 0]
+            );
+        }
+        elseif($input['status'] == 'PARKED'){
+            $park_sensor = ParkSensor::where('id_sensor',$input['id_sensor'])->update(
                 ['status' => 1]
             );
         }
-        else{
+        elseif($input['status'] == 'OCCUPIED'){
             $park_sensor = ParkSensor::where('id_sensor',$input['id_sensor'])->update(
                 ['status' => 2]
             );
@@ -344,7 +320,7 @@ class CarParkSlotController extends Controller
 
         return redirect()->intended('/slot-admin');
     }
-
+    
     // // create table car_park_slot_dump
     // private function createCarParkSlotDumps($slot, $input, $slot_name)
     // {

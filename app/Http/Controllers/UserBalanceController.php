@@ -14,8 +14,10 @@ class UserBalanceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
         $user_balance = UserBalance::leftJoin('user_credentials', 
         'user_credentials.id_user','=','user_balances.id_user')
         ->select('email','user_balances.*')
@@ -72,9 +74,14 @@ class UserBalanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(UserBalance $user_balance, $id_user)
     {
-        //
+        $user_balance = $user_balance->where('id_user', $id_user)->select('balance')->first();
+
+        return fractal()
+        ->item($user_balance)
+        ->transformWith(new BalanceTransformer)
+        ->toArray();
     }
 
     /**
@@ -157,5 +164,25 @@ class UserBalanceController extends Controller
         }
         $querys = $query->count();
         return $query->paginate($querys);
+    }
+
+    public function updateUserCharge(Request $request, $id_user)
+    {
+        $old_balance = UserBalance::where('id_user', $id_user)->pluck('balance')->first();
+
+        $new_balance = $old_balance - 20000;
+
+        $input = [
+            'balance' =>  $new_balance,
+            ];
+
+        if($new_balance < 0)
+        {
+            return response()->json(['error' => 'Insufficient balance'], 402);
+        }            
+
+        UserBalance::where('id_user', $id_user)->update($input);
+
+        return response()->json(['msg'=>'Success']);
     }
 }

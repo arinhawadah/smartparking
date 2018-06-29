@@ -29,7 +29,7 @@ class AuthController extends Controller
     {
         $this->validate($request, [
             'name' => 'required',
-            'email'=> 'required|email|unique:user_registrations',
+            'email'=> 'required|email|unique:user_credentials',
             'password'=>'required|min:6',
             'car_type'=>'required',
             'license_plate_number' => 'required|max:10',
@@ -64,12 +64,12 @@ class AuthController extends Controller
         // ->toArray();
 
         // return response()->json($response, 201);
-        if($reqest->wantsJson())
+        if($request->wantsJson())
         {
         return response()->json('Register Success');
         }
 
-        return view('users-mgmt/index', ['users' => $users]);
+        return redirect()->intended('/user-admin');
     }
 
     // register admin
@@ -79,7 +79,7 @@ class AuthController extends Controller
 
         $this->validate($request, [
             'name' => 'required',
-            'email'=> 'required|email|unique:user_registrations',
+            'email'=> 'required|email|unique:user_credentials',
             'password'=>'required|min:6',
             'car_type'=>'required',
             'license_plate_number' => 'required|max:10',
@@ -90,7 +90,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password'=>bcrypt($request->password),
-            'activation_token' => str_random(25),
+            // 'activation_token' => str_random(25),
             'car_type' => $request->car_type,
             'license_plate_number' => $request->license_plate_number,
         ]);
@@ -109,7 +109,7 @@ class AuthController extends Controller
         // ->toArray();
 
         // return response()->json($response, 201);
-        return view('users-mgmt/index', ['users' => $users]);
+        return redirect()->intended('/user-admin');
     }
 
     // login
@@ -167,6 +167,8 @@ class AuthController extends Controller
         $user = $user->where('email', $request->email)->first();
 
         event(new EmailResetPassword($user));
+
+        return "Check Your Email";
     }
 
 }

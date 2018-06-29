@@ -25,7 +25,7 @@ class ActivationController extends Controller
                 'car_type' => $user_registration->car_type,
                 'license_plate_number' => $user_registration->license_plate_number,
                 'password' => $user_registration->password,
-                'activation_token'=> str_random(25),
+                // 'activation_token'=> str_random(25),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
