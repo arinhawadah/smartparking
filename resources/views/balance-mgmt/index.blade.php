@@ -29,38 +29,40 @@
       </form>
     <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
       <div class="row">
-        <div class="col-sm-12">
+        <div class="col-sm-12 box-body table-responsive">
           <table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
             <thead>
               <tr role="row">
-                <th width="5%" class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Id: activate to sort column descending">Id</th>
-                <th width="20%" class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Email: activate to sort column ascending">Email</th>
-                <th width="20%" class="sorting hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Balance: activate to sort column ascending">Balance</th>
-                <th width="15%" class="sorting hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Time: activate to sort column ascending">Time</th>
-                <th tabindex="0" aria-controls="example2" rowspan="1" colspan="2" aria-label="Action: activate to sort column ascending">Action</th>
+                <th width="15%" tabindex="0" aria-controls="example2" rowspan="1" colspan="2">Action</th>
+                <th width="5%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Id: activate to sort column descending">Id</th>
+                <th width="20%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Email: activate to sort column ascending">Email</th>
+                <th width="20%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Balance: activate to sort column ascending">Balance</th>
+                <th width="15%" class="hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Time: activate to sort column ascending">Time</th>
               </tr>
             </thead>
             <tbody>
             @foreach ($balance as $balances)
                 <tr role="row" class="odd">
-                  <td class="sorting_1">{{ $balances->id_balance }}</td>
-                  <td>{{ $balances->email }}</td>
-                  <td>{{ $balances->balance }}</td>
-                  <td class="hidden-xs">{{ $balances->updated_at }}</td>
+                  <td>
+                        <a href="{{ route('balance-admin.edit', ['id_balance' => $balances->id_balance]) }}" class="btn btn-warning col-sm-8 col-xs-8 btn-margin">
+                        Update
+                        </a>
+                  </td>
                   <td>
                     <form class="row" method="POST" action="{{ route('balance-admin.destroy', ['id_balance' => $balances->id_balance]) }}" onsubmit = "return confirm('Are you sure?')">
                         <input type="hidden" name="_method" value="DELETE">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <a href="{{ route('balance-admin.edit', ['id_balance' => $balances->id_balance]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
-                        Update
-                        </a>
                         @if ($balances->email != Auth::user()->email)
-                         <button type="submit" class="btn btn-danger col-sm-3 col-xs-5 btn-margin">
+                         <button type="submit" class="btn btn-danger col-sm-8 col-xs-8 btn-margin">
                           Delete
                         </button>
                         @endif
                     </form>
                   </td>
+                  <td>{{ $balances->id_balance }}</td>
+                  <td>{{ $balances->email }}</td>
+                  <td>{{ $balances->balance }}</td>
+                  <td class="hidden-xs">{{ $balances->updated_at }}</td>
               </tr>
             @endforeach
             </tbody>

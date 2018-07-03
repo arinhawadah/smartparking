@@ -56,7 +56,7 @@ class LoginController extends Controller
                 'required','string',
                 Rule::exists('user_credentials')
             ],
-        ], ['Please verifiy your email']);
+        ], ['Your email have not registerd']);
 
         if (!Auth::attempt(['email'=>$request->email,'password'=>$request->password],true)){
             return response()->json(['error'=>'Your credential is wrong'],401);

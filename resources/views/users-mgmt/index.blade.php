@@ -34,16 +34,16 @@
       </form>
     <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
       <div class="row">
-        <div class="col-sm-12">
+        <div class="col-sm-12 box-body table-responsive">
           <table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
             <thead>
               <tr role="row">
-                <th width="5%" class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Id: activate to sort column descending">Id</th>
-                <th width="10%" class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Role Name: activate to sort column ascending">Role</th>
-                <th width="20%" class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Email: activate to sort column ascending">Email</th>
-                <th width="20%" class="sorting hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Name: activate to sort column ascending">Name</th>
-                <th width="15%" class="sorting hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Car License: activate to sort column ascending">Car License</th>
-                <th tabindex="0" aria-controls="example2" rowspan="1" colspan="2" aria-label="Action: activate to sort column ascending">Action</th>
+                <th width="15%" tabindex="0" aria-controls="example2" rowspan="1" colspan="2">Action</th>
+                <th width="5%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Id: activate to sort column descending">Id</th>
+                <th width="10%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Role Name: activate to sort column ascending">Role</th>
+                <th width="20%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Email: activate to sort column ascending">Email</th>
+                <th width="20%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Name: activate to sort column ascending">Name</th>
+                <th width="15%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Car License: activate to sort column ascending">Car License</th>
               </tr>
             </thead>
             <tbody>
@@ -51,47 +51,51 @@
                 <tr role="row" class="odd">
                 @foreach($user->roles as $role)
                   @if (Auth::user()->roles()->pluck('role_name')->first() == 'Super Admin')
-                  <td class="sorting_1">{{ $user->id_user }}</td>
-                  <td class="hidden-xs" style="color:red;">{{ $role->role_name != 'User'?  $role->role_name : '' }}</td>
-                  <td>{{ $user->email }}</td>
-                  <td>{{ $user->name }}</td>
-                  <td class="hidden-xs">{{ $user->license_plate_number }}</td>
+                  <td>
+                        <a href="{{ route('user-admin.edit', ['id_user' => $user->id_user]) }}" class="btn btn-warning col-sm-8 col-xs-8 btn-margin">
+                        Update
+                        </a>
+                  </td>
                   <td>
                     <form class="row" method="POST" action="{{ route('user-admin.destroy', ['id_user' => $user->id_user]) }}" onsubmit = "return confirm('Are you sure?')">
                         <input type="hidden" name="_method" value="DELETE">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <a href="{{ route('user-admin.edit', ['id_user' => $user->id_user]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
-                        Update
-                        </a>
                         @if ($user->email != Auth::user()->email)
-                         <button type="submit" class="btn btn-danger col-sm-3 col-xs-5 btn-margin">
+                         <button type="submit" class="btn btn-danger col-sm-8 col-xs-8 btn-margin">
                           Delete
                         </button>
                         @endif
                     </form>
                   </td>
+                  <td >{{ $user->id_user }}</td>
+                  <td style="color:red;">{{ $role->role_name != 'User'?  $role->role_name : '' }}</td>
+                  <td>{{ $user->email }}</td>
+                  <td>{{ $user->name }}</td>
+                  <td >{{ $user->license_plate_number }}</td>
 
                   @elseif (Auth::user()->roles()->pluck('role_name')->first() == 'Admin')
                     @if ($role->role_name == 'User')
-                      <td class="sorting_1">{{ $user->id_user }}</td>
-                      <td class="hidden-xs" style="color:red;">{{ $role->role_name}}</td>
-                      <td>{{ $user->email }}</td>
-                      <td>{{ $user->name }}</td>
-                      <td class="hidden-xs">{{ $user->license_plate_number }}</td>
+                    <td>
+                          <a href="{{ route('user-admin.edit', ['id_user' => $user->id_user]) }}" class="btn btn-warning col-sm-8 col-xs-8 btn-margin">
+                          Update
+                          </a>
+                      </td>
                       <td>
                       <form class="row" method="POST" action="{{ route('user-admin.destroy', ['id_user' => $user->id_user]) }}" onsubmit = "return confirm('Are you sure?')">
                           <input type="hidden" name="_method" value="DELETE">
                           <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                          <a href="{{ route('user-admin.edit', ['id_user' => $user->id_user]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
-                          Update
-                          </a>
                           @if ($user->email != Auth::user()->email)
-                            <button type="submit" class="btn btn-danger col-sm-3 col-xs-5 btn-margin">
+                            <button type="submit" class="btn btn-danger col-sm-8 col-xs-8 btn-margin">
                             Delete
                             </button>
                           @endif
                       </form>
                       </td>
+                      <td >{{ $user->id_user }}</td>
+                      <td style="color:red;">{{ $role->role_name}}</td>
+                      <td>{{ $user->email }}</td>
+                      <td>{{ $user->name }}</td>
+                      <td >{{ $user->license_plate_number }}</td>
                     @endif
                   @endif
                 @endforeach

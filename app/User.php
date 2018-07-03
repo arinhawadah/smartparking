@@ -50,10 +50,12 @@ class User extends Authenticatable
         return $this->hasAnyRole($roles) || 
         // response()->json(['error'=>'This action is unauthorized.',401]);
                 abort(401, 'This action is unauthorized.');
+                // redirect('401-error');
     }
     return $this->hasRole($roles) || 
     // response()->json(['error'=>'This action is unauthorized.',401]);
             abort(401, 'This action is unauthorized.');
+            // redirect('401-error');
     }
     /**
     * Check multiple roles

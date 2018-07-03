@@ -94,11 +94,11 @@ desired effect
       <!-- Main content -->
       <section class="content">
       <div class="row">
-        <div class="col-xs-12">
+        <div class="col-md-6">
           <!-- AREA CHART -->
           <div class="box box-primary">
             <div class="box-header with-border">
-              <h3 class="box-title">Area Chart</h3>
+              <h3 class="box-title">Hourly Visitors ({{ date('F/Y') }})</h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -108,7 +108,7 @@ desired effect
             </div>
             <div class="box-body">
               <div class="chart">
-                <canvas id="areaChart" style="height:250px"></canvas>
+                <canvas id="barChart-0" style="height:230px"></canvas>
               </div>
             </div>
             <!-- /.box-body -->
@@ -117,6 +117,28 @@ desired effect
 
         </div>
         <!-- /.col -->
+
+        <div class="col-md-6">
+        <!-- BAR CHART -->
+          <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title">Daily Visitors ({{ date('F/Y') }})</h3>
+
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>
+            <div class="box-body">
+              <div class="chart">
+                <canvas id="barChart-1" style="height:230px"></canvas>
+              </div>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
       </div>
       <!-- /.row -->
 
@@ -125,7 +147,7 @@ desired effect
           <!-- BAR CHART -->
           <div class="box box-primary">
             <div class="box-header with-border">
-              <h3 class="box-title">Bar Chart</h3>
+              <h3 class="box-title">Monthly Visitors ({{ date('Y') }})</h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -169,7 +191,7 @@ desired effect
         <!-- BAR CHART -->
           <div class="box box-primary">
             <div class="box-header with-border">
-              <h3 class="box-title">Bar Chart</h3>
+              <h3 class="box-title">Yerly Visitors</h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -179,7 +201,7 @@ desired effect
             </div>
             <div class="box-body">
               <div class="chart">
-                <canvas id="barChart-1" style="height:230px"></canvas>
+                <canvas id="barChart-2" style="height:230px"></canvas>
               </div>
             </div>
             <!-- /.box-body -->
@@ -231,39 +253,36 @@ desired effect
     var data_visitor_time = <?php echo $visitor_time; ?>;
     var data_visitor_day = <?php echo $visitor_day; ?>;
     var data_visitor_month = <?php echo $visitor_month; ?>;
+    var data_visitor_year = <?php echo $visitor_year; ?>;
     var data_day = <?php echo $day; ?>;
     var data_month = <?php echo $month; ?>;
     var data_time = <?php echo $time; ?>;
-    //--------------
-    //- AREA CHART -
-    //--------------
-
-    // Get context with jQuery - using jQuery's .get() method.
-    var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
-    // This will get the first returned node in the jQuery collection.
-    var areaChart = new Chart(areaChartCanvas);
-
-    var areaChartData = {
+    var data_year = <?php echo $year; ?>;
+    //-------------
+    //- BAR CHART -
+    //-------------
+    var barChartCanvas = $("#barChart-0").get(0).getContext("2d");
+    var barChart = new Chart(barChartCanvas);
+    var barChartData = {
       labels: data_time,
       datasets: [
         {
           label: "Digital Goods",
-          fillColor: "rgba(60,141,188,0.9)",
-          strokeColor: "rgba(60,141,188,0.8)",
-          pointColor: "#3b8bba",
+          fillColor: "#99bbff",
+          strokeColor: "#99bbff",
+          pointColor: "#99bbff",
           pointStrokeColor: "rgba(60,141,188,1)",
           pointHighlightFill: "#fff",
           pointHighlightStroke: "rgba(60,141,188,1)",
-          data: data_visitor_time,
+          data: data_visitor_time
         }
       ]
     };
-
-    var areaChartOptions = {
-      //Boolean - If we should show the scale at all
-      showScale: true,
+    var barChartOptions = {
+      //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+      scaleBeginAtZero: true,
       //Boolean - Whether grid lines are shown across the chart
-      scaleShowGridLines: false,
+      scaleShowGridLines: true,
       //String - Colour of the grid lines
       scaleGridLineColor: "rgba(0,0,0,.05)",
       //Number - Width of the grid lines
@@ -272,64 +291,23 @@ desired effect
       scaleShowHorizontalLines: true,
       //Boolean - Whether to show vertical lines (except Y axis)
       scaleShowVerticalLines: true,
-      //Boolean - Whether the line is curved between points
-      bezierCurve: true,
-      //Number - Tension of the bezier curve between points
-      bezierCurveTension: 0.3,
-      //Boolean - Whether to show a dot for each point
-      pointDot: false,
-      //Number - Radius of each point dot in pixels
-      pointDotRadius: 4,
-      //Number - Pixel width of point dot stroke
-      pointDotStrokeWidth: 1,
-      //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-      pointHitDetectionRadius: 20,
-      //Boolean - Whether to show a stroke for datasets
-      datasetStroke: true,
-      //Number - Pixel width of dataset stroke
-      datasetStrokeWidth: 2,
-      //Boolean - Whether to fill the dataset with a color
-      datasetFill: true,
+      //Boolean - If there is a stroke on each bar
+      barShowStroke: true,
+      //Number - Pixel width of the bar stroke
+      barStrokeWidth: 2,
+      //Number - Spacing between each of the X value sets
+      barValueSpacing: 5,
+      //Number - Spacing between data sets within X values
+      barDatasetSpacing: 1,
       //String - A legend template
-      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
-      //Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
-      maintainAspectRatio: true,
-      //Boolean - whether to make the chart responsive to window resizing
-      responsive: true
+      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
+      //Boolean - whether to make the chart responsive
+      responsive: true,
+      maintainAspectRatio: true
     };
 
-    //Create the line chart
-    areaChart.Line(areaChartData, areaChartOptions);
-  
-    //   /*
-    //  * BAR CHART
-    //  * ---------
-    //  */
-
-    // var bar_data = {
-    //   data: [[data_month[0], data_visitor_month[0]], [data_month[1], data_visitor_month[1]], [data_month[2], data_visitor_month[2]], [data_month[3], data_visitor_month[3]], [data_month[4], data_visitor_month[4]], [data_month[5], data_visitor_month[5]], 
-    //   [data_month[6], data_visitor_month[6]], [data_month[7], data_visitor_month[7]], [data_month[8], data_visitor_month[8]], [data_month[9], data_visitor_month[9]], [data_month[10], data_visitor_month[10]], [data_month[11], data_visitor_month[11]]],
-    //   color: "#3c8dbc"
-    // };
-    // $.plot("#bar-chart-2", [bar_data], {
-    //   grid: {
-    //     borderWidth: 1,
-    //     borderColor: "#f3f3f3",
-    //     tickColor: "#f3f3f3",
-    //   },
-    //   series: {
-    //     bars: {
-    //       show: true,
-    //       barWidth: 0.5,
-    //       align: "center"
-    //     }
-    //   },
-    //   xaxis: {
-    //     mode: "categories",
-    //     tickLength: 0
-    //   }
-    // });
-    // /* END BAR CHART */
+    barChartOptions.datasetFill = false;
+    barChart.Bar(barChartData, barChartOptions);
     
     //-------------
     //- BAR CHART -
@@ -462,6 +440,57 @@ desired effect
           pointHighlightFill: "#fff",
           pointHighlightStroke: "rgba(60,141,188,1)",
           data: data_visitor_day
+        }
+      ]
+    };
+    var barChartOptions = {
+      //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+      scaleBeginAtZero: true,
+      //Boolean - Whether grid lines are shown across the chart
+      scaleShowGridLines: true,
+      //String - Colour of the grid lines
+      scaleGridLineColor: "rgba(0,0,0,.05)",
+      //Number - Width of the grid lines
+      scaleGridLineWidth: 1,
+      //Boolean - Whether to show horizontal lines (except X axis)
+      scaleShowHorizontalLines: true,
+      //Boolean - Whether to show vertical lines (except Y axis)
+      scaleShowVerticalLines: true,
+      //Boolean - If there is a stroke on each bar
+      barShowStroke: true,
+      //Number - Pixel width of the bar stroke
+      barStrokeWidth: 2,
+      //Number - Spacing between each of the X value sets
+      barValueSpacing: 5,
+      //Number - Spacing between data sets within X values
+      barDatasetSpacing: 1,
+      //String - A legend template
+      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
+      //Boolean - whether to make the chart responsive
+      responsive: true,
+      maintainAspectRatio: true
+    };
+
+    barChartOptions.datasetFill = false;
+    barChart.Bar(barChartData, barChartOptions);
+
+    //-------------
+    //- BAR CHART -
+    //-------------
+    var barChartCanvas = $("#barChart-2").get(0).getContext("2d");
+    var barChart = new Chart(barChartCanvas);
+    var barChartData = {
+      labels: data_year,
+      datasets: [
+        {
+          label: "Digital Goods",
+          fillColor: "#99bbff",
+          strokeColor: "#99bbff",
+          pointColor: "#99bbff",
+          pointStrokeColor: "rgba(60,141,188,1)",
+          pointHighlightFill: "#fff",
+          pointHighlightStroke: "rgba(60,141,188,1)",
+          data: data_visitor_year
         }
       ]
     };

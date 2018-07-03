@@ -244,6 +244,15 @@ class ReservationController extends Controller
     {
         // $request->user()->authorizeRoles(['Super Admin', 'Admin', 'User']);
 
+        $user_park = UserPark::where('id_user_park', $id_user_park)->select('price','id_user')->first();
+        $old_balance = UserBalance::where('id_user', $user_park['id_user'])->pluck('balance')->first();
+
+        $new_balance = [
+            'balance' => $old_balance + $user_park['price'],
+        ];
+
+        UserBalance::where('id_user', $user_park['id_user'])->update($new_balance);
+
         UserPark::where('id_user_park', $id_user_park)->delete();
         HistoryTransaction::where('id_user_park', $id_user_park)->delete();
 
