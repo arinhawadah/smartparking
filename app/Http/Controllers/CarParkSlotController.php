@@ -86,22 +86,26 @@ class CarParkSlotController extends Controller
             if ($day_check != NULL)
             {
                 try { //cobain pake foreach deh rin misal cek slot 1 -> ada jam itu atau nggak, kalo ada lanjut ke slot 2,3,4,5,dst
+                    $from = min($arrive_time, $leaving_time);
+                    $till = max($arrive_time, $leaving_time);
+
+                    $user_park = UserPark::where('arrive_time', '<=', date('Y-m-d').' '.$from)
+                    ->where('leaving_time', '>=', date('Y-m-d').' '.$till)
+                    ->orWhereBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
+                    ->orWhereBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
+                    ->select('user_parks.id_slot_user_park')
+                    ->orderBy('user_parks.id_slot_user_park','asc')
+                    ->groupBy('id_slot_user_park')
+                    // ->firstOrFail();
+                    ->get()->toArray();
+
                     $car_park_slot = $car_park_slot
-                    ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot_user_park')
-                    ->where('status','<>' ,'PARKED') // bedanya cuma ini sama yg cek availability slot
-                    ->whereDate('arrive_time', date('Y-m-d'))
-                    ->whereDate('leaving_time', date('Y-m-d'))       
-                    ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
-                    ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
-                    ->orWhere('arrive_time', NULL)
-                    ->orWhere('leaving_time', NULL)
-                    // ->orWhere('status', 'AVAILABLE')
+                    ->where('status','<>' ,'PARKED')
+                    ->whereNotIn('id_slot', $user_park)
                     ->select('car_park_slots.id_slot','car_park_slots.slot_name')
                     ->orderBy('car_park_slots.id_slot','asc')
-                    // ->take(1)
                     ->firstOrFail();
-                    // ->get();
-                    // dd($car_park_slot);
+                    
                   } catch (ModelNotFoundException $ex) {
                     return response()->json("Full Booked", 404);
                   }       
@@ -146,21 +150,25 @@ class CarParkSlotController extends Controller
         if ($day_check != NULL)
         {
             try { //cobain pake foreach deh rin misal cek slot 1 -> ada jam itu atau nggak, kalo ada lanjut ke slot 2,3,4,5,dst
-                $car_park_slot = $car_park_slot
-                ->leftJoin('user_parks','car_park_slots.id_slot','=','user_parks.id_slot_user_park')
-                ->whereDate('arrive_time', date('Y-m-d'))
-                ->whereDate('leaving_time', date('Y-m-d'))       
-                ->whereNotBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
-                ->whereNotBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
-                ->orWhere('arrive_time', NULL)
-                ->orWhere('leaving_time', NULL)
-                // ->orWhere('status', 'AVAILABLE')
-                ->select('car_park_slots.id_slot','car_park_slots.slot_name')
-                ->orderBy('car_park_slots.id_slot','asc')
-                // ->take(1)
-                ->firstOrFail();
-                // ->get();
-                // dd($car_park_slot);
+                    $from = min($arrive_time, $leaving_time);
+                    $till = max($arrive_time, $leaving_time);
+
+                    $user_park = UserPark::where('arrive_time', '<=', date('Y-m-d').' '.$from)
+                    ->where('leaving_time', '>=', date('Y-m-d').' '.$till)
+                    ->orWhereBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
+                    ->orWhereBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
+                    ->select('user_parks.id_slot_user_park')
+                    ->orderBy('user_parks.id_slot_user_park','asc')
+                    ->groupBy('id_slot_user_park')
+                    // ->firstOrFail();
+                    ->get()->toArray();
+
+                   $car_park_slot = $car_park_slot
+                   ->whereNotIn('id_slot', $user_park)
+                   ->select('car_park_slots.id_slot','car_park_slots.slot_name')
+                   ->orderBy('car_park_slots.id_slot','asc')
+                   ->firstOrFail();
+
               } catch (ModelNotFoundException $ex) {
                 return response()->json("Full Booked", 404);
               }       

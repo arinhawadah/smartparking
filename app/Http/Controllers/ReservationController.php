@@ -37,7 +37,7 @@ class ReservationController extends Controller
         $users = $user_park
         ->leftJoin('user_credentials','user_parks.id_user','=','user_credentials.id_user')
         ->leftJoin('car_park_slots','user_parks.id_slot_user_park','=','car_park_slots.id_slot')
-        ->whereMonth('arrive_time','=',date('m'))
+        // ->whereMonth('arrive_time','=',date('m'))
         ->select('car_park_slots.slot_name','user_parks.arrive_time','user_parks.leaving_time','user_parks.price',
         'user_parks.id_user_park','user_credentials.name')
         ->orderBy('id_user_park', 'desc')
