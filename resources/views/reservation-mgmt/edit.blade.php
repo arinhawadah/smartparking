@@ -15,7 +15,7 @@
                             <div class="col-md-6">
                                 <select class="form-control" name="id_slot">
                                     @foreach ($slot as $slots)
-                                        <option value="{{$slots->id_slot}}" {{$user->id_slot_user_park ==  $slots->id_slot ? 'selected' : ''}}>{{$slots->slot_name}}</option>
+                                        <option value="{{$slots->id_slot}}" {{$user->id_slot ==  $slots->id_slot ? 'selected' : ''}}>{{$slots->slot_name}}</option>
                                     @endforeach
                                 </select>
                             </div>

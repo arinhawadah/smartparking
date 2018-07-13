@@ -30,6 +30,8 @@ class ActivationController extends Controller
                 'updated_at' => now(),
             ]
         );
+        
+        UserRegistration::where('email', $request->email)->delete();
 
         $user
         ->roles()

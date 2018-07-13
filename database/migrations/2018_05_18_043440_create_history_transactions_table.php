@@ -13,7 +13,7 @@ class CreateHistoryTransactionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('history_transactions', function (Blueprint $table) {
+        Schema::create('history_of_transactions', function (Blueprint $table) {
             $table->increments('id_history');
             $table->integer('id_slot')->unsigned();
             $table->integer('id_user')->unsigned();
@@ -31,6 +31,6 @@ class CreateHistoryTransactionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('history_transactions');
+        Schema::dropIfExists('history_of_transactions');
     }
 }

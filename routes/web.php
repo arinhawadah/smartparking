@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-    return redirect('admin/allslot');
+    return redirect('reservations');
 })->middleware('auth');
 
 Route::get('/calendar', function () {
@@ -39,27 +39,27 @@ Route::resource('slot-admin', 'CarParkSlotController');
 // Route::post('admin/addslot', 'CarParkSlotController@createParkSlot')->name('create-slot');
 // Route::delete('admin/deleteslot/{slot_name}','CarParkSlotController@deleteParkSlot')->name('delete-slot');
 Route::get('admin/carparkslot/{time}','CarParkSlotController@slotByTime');
-Route::get('admin/allslot','DashboardController@allSlotByTime')->name('allslot');
 
 Route::resource('user-admin', 'UserController');
-Route::get('admin/profile','UserController@profile');
+Route::get('user-admin/profile','UserController@profile');
 // Route::get('admin/showuser','UserController@users');
 Route::get('admin/createuser','UserController@createUser');
-Route::post('admin/showuseremail','UserController@showUserbyEmail')->name('email-search');
+Route::post('user-admin/search','UserController@showUserbyEmail')->name('user-search');
 // Route::get('admin/showuserid/{id_user}/edit','UserController@showUserbyId')->name('search-user');
 // Route::delete('admin/deleteuser/{id_user}','UserController@deleteUser')->name('delete-user');
 // Route::post('users/updateprofile/{id_user}','UserController@updateProfile')->name('update-user');
 
 Route::resource('reservation-admin', 'ReservationController');
-Route::post('admin/showname','ReservationController@showReservationbyUser')->name('reservation-search');
+Route::post('reservation-admin/search','ReservationController@showReservationbyUser')->name('reservation-search');
+Route::get('reservations','DashboardController@allSlotByTime')->name('allreservations');
 // Route::get('admin/showreservation','ReservationController@reservation');
 // Route::get('admin/showreservationid/{id_user_park}/edit','ReservationController@showReservationbyId')->name('search-reservation');
 // Route::post('admin/updatereserevation/{id_user_park}','ReservationController@updateAdminReservation')->name('update-reservation');
 // Route::post('admin/addreservation','ReservationController@addAdminReservation')->name('create-reservation');
 // Route::delete('admin/deletereserevation/{id_user_park}','ReservationController@deleteReservation')->name('delete-reservation');
 
-Route::post('auth/admin/register', 'AuthController@registerAdmin')->name('register-admin');
-Route::post('auth/user/register','AuthController@register')->name('register-user');
+Route::post('auth/register-admin', 'AuthController@registerAdmin')->name('register-admin');
+// Route::post('auth/register-user','AuthController@register')->name('register-user');
 // Route::post('auth/user/resetpassword','AuthController@ResetPassword')->name('reset-password');
 
 Route::resource('balance-admin', 'UserBalanceController');

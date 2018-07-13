@@ -61,11 +61,11 @@ class CarParkSlotController extends Controller
     {
         $user_park = $user_park
         ->where('id_user_park','=', $id_user_park)
-        ->select('id_slot_user_park', 'arrive_time', 'leaving_time')
+        ->select('id_slot', 'arrive_time', 'leaving_time')
         ->first();
 
         $car_park_slot = $car_park_slot
-        ->where('id_slot','=', $user_park['id_slot_user_park'])
+        ->where('id_slot','=', $user_park['id_slot'])
         ->first();
 
         if($car_park_slot['status'] == 'PARKED')
@@ -93,9 +93,9 @@ class CarParkSlotController extends Controller
                     ->where('leaving_time', '>=', date('Y-m-d').' '.$till)
                     ->orWhereBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
                     ->orWhereBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
-                    ->select('user_parks.id_slot_user_park')
-                    ->orderBy('user_parks.id_slot_user_park','asc')
-                    ->groupBy('id_slot_user_park')
+                    ->select('user_parks.id_slot')
+                    ->orderBy('user_parks.id_slot','asc')
+                    ->groupBy('id_slot')
                     // ->firstOrFail();
                     ->get()->toArray();
 
@@ -157,9 +157,9 @@ class CarParkSlotController extends Controller
                     ->where('leaving_time', '>=', date('Y-m-d').' '.$till)
                     ->orWhereBetween('arrive_time', [date('Y-m-d').' '.$arrive_time1, date('Y-m-d').' '.$leaving_time1])
                     ->orWhereBetween('leaving_time',[date('Y-m-d').' '.$arrive_time2, date('Y-m-d').' '.$leaving_time2])
-                    ->select('user_parks.id_slot_user_park')
-                    ->orderBy('user_parks.id_slot_user_park','asc')
-                    ->groupBy('id_slot_user_park')
+                    ->select('user_parks.id_slot')
+                    ->orderBy('user_parks.id_slot','asc')
+                    ->groupBy('id_slot')
                     // ->firstOrFail();
                     ->get()->toArray();
 

@@ -36,7 +36,7 @@ class ReservationController extends Controller
 
         $users = $user_park
         ->leftJoin('user_credentials','user_parks.id_user','=','user_credentials.id_user')
-        ->leftJoin('car_park_slots','user_parks.id_slot_user_park','=','car_park_slots.id_slot')
+        ->leftJoin('car_park_slots','user_parks.id_slot','=','car_park_slots.id_slot')
         // ->whereMonth('arrive_time','=',date('m'))
         ->select('car_park_slots.slot_name','user_parks.arrive_time','user_parks.leaving_time','user_parks.price',
         'user_parks.id_user_park','user_credentials.name')
@@ -92,7 +92,7 @@ class ReservationController extends Controller
 
         $user_park = $user_park->create([
             'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
-            'id_slot_user_park' => $request->id_slot,
+            'id_slot' => $request->id_slot,
             'unique_id' => Auth::user()->unique_id, 
             'arrive_time' => date('Y-m-d').' '.$request->arrive_time,
             'leaving_time' => date('Y-m-d').' '.$request->leaving_time,
@@ -146,7 +146,7 @@ class ReservationController extends Controller
 
         $user_park = $user_park->create([
             'id_user' => $user->id_user,
-            'id_slot_user_park' => $request->id_slot,
+            'id_slot' => $request->id_slot,
             'unique_id' => $user->unique_id, 
             'arrive_time' => $request->arrive_time,
             'leaving_time' => $request->leaving_time,
@@ -172,7 +172,7 @@ class ReservationController extends Controller
         $user_park = $user_park->where('id_user_park', $id_user_park)
             ->update(
                 [
-                    'id_slot_user_park' => $request->id_slot,
+                    'id_slot' => $request->id_slot,
                 ]
             );
 
@@ -227,7 +227,7 @@ class ReservationController extends Controller
             $user_park = $user_park->where('id_user_park', $id_user_park)
             ->update(
                 [
-                    'id_slot_user_park' => $id_slot,
+                    'id_slot' => $id_slot,
                     'arrive_time' => $update['arrive_time'],
                     'leaving_time' => $update['leaving_time'],
                     'price' => $update['price'],
@@ -244,7 +244,7 @@ class ReservationController extends Controller
     {
         // $request->user()->authorizeRoles(['Super Admin', 'Admin', 'User']);
 
-        $user_park = UserPark::where('id_user_park', $id_user_park)->select('price','id_user')->first();
+        $user_park = UserPark::where('id_user_park', $id_user_park)->select('price','id_user')->firstOrFail();
         $old_balance = UserBalance::where('id_user', $user_park['id_user'])->pluck('balance')->first();
 
         $new_balance = [
@@ -252,9 +252,8 @@ class ReservationController extends Controller
         ];
 
         UserBalance::where('id_user', $user_park['id_user'])->update($new_balance);
-
-        UserPark::where('id_user_park', $id_user_park)->delete();
         HistoryTransaction::where('id_user_park', $id_user_park)->delete();
+        UserPark::where('id_user_park', $id_user_park)->delete();
 
         if ($request->wantsJson()){
         return response()->json('Delete Success');
@@ -266,9 +265,9 @@ class ReservationController extends Controller
     //history transaction
     private function historyTransaction($user_park)
     {
-        $history_transaction = HistoryTransaction::insert(
+        $history_of_transaction = HistoryTransaction::insert(
             [
-                'id_slot' => $user_park['id_slot_user_park'],
+                'id_slot' => $user_park['id_slot'],
                 'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
                 'id_user_park'  => $user_park['id_user_park'],
                 'price' => $user_park['price'],
@@ -276,15 +275,15 @@ class ReservationController extends Controller
                 'updated_at' => now(),
             ]
         );
-        return $history_transaction;
+        return $history_of_transaction;
     }
 
     //history transaction
     private function historyTransactionfromAdmin($user_park)
     {
-        $history_transaction = HistoryTransaction::insert(
+        $history_of_transaction = HistoryTransaction::insert(
             [
-                'id_slot' => $user_park['id_slot_user_park'],
+                'id_slot' => $user_park['id_slot'],
                 'id_user' => $user_park['id_user'],
                 'id_user_park'  => $user_park['id_user_park'],
                 'price' => $user_park['price'],
@@ -292,7 +291,7 @@ class ReservationController extends Controller
                 'updated_at' => now(),
             ]
         );
-        return $history_transaction;
+        return $history_of_transaction;
     }
 
     //search reservation by id_user_park
@@ -330,7 +329,7 @@ class ReservationController extends Controller
 
     private function doSearchingQuery($constraints) {
         $query = UserPark::leftJoin('user_credentials','user_parks.id_user','=','user_credentials.id_user')
-        ->leftJoin('car_park_slots','user_parks.id_slot_user_park','=','car_park_slots.id_slot')
+        ->leftJoin('car_park_slots','user_parks.id_slot','=','car_park_slots.id_slot')
         ->whereMonth('arrive_time','=',date('m'))
         ->select('car_park_slots.slot_name','user_parks.arrive_time','user_parks.leaving_time','user_parks.price',
         'user_parks.id_user_park','user_credentials.name')

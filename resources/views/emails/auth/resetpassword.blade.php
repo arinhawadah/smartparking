@@ -1,7 +1,7 @@
 @component('mail::message')
-# Reset Password SPark
+# Reset Password Parkys
 
-For reset password your SPark account, Please click button bellow
+For reset password your Parkys account, Please click button bellow
 
 @component('mail::button', ['url' => route('auth.resetpassword', [
         'email'=>$user->email

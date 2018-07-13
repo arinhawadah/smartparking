@@ -19,7 +19,7 @@
       @if (Auth::user()->roles()->pluck('role_name')->first() != 'User')
       <ul class="sidebar-menu">
         <li class="header">MAIN NAVIGATION</li>
-        <li class="active"><a href="{{ route('allslot') }}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
+        <li class="active"><a href="{{ route('allreservations') }}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
         <!-- <li class="active"><a href="{{ url('admin/allslot') }}"><i class="fa fa-link"></i> <span>Dashboard</span></a></li> -->
         <li><a href="{{ route('reservation-admin.index') }}"><i class="fa fa-car"></i> <span>Reservation Management</span></a></li>
         <li><a href="{{ route('slot-admin.index') }}"><i class="fa fa-map-pin"></i> <span>Slot Management</span></a></li>

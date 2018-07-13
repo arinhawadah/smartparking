@@ -18,19 +18,19 @@ use Illuminate\Http\Request;
 // });
 
 //user
-Route::post('auth/user/register','AuthController@register');
+Route::post('auth/register-user','AuthController@register')->name('register-user');
 Route::post('auth/login','AuthController@login');
-Route::post('auth/user/resetpassword','AuthController@ResetPassword')->name('reset-password');
+Route::post('auth/resetpassword/sendemail','AuthController@ResetPassword')->name('reset-password');
 // Route::get('users/profile','UserController@profile')->middleware('cors');
-Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
-Route::post('addreservation','ReservationController@addReservation')->middleware('cors');
-Route::delete('user/deletereserevation/{id_user_park}','ReservationController@destroy');
-Route::patch('updatereserevation/{id_user_park}','ReservationController@updateReservation');
+// Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
+Route::post('reservation/add','ReservationController@addReservation')->middleware('cors');
+Route::delete('reservation/cancel/{id_user_park}','ReservationController@destroy');
+// Route::patch('updatereserevation/{id_user_park}','ReservationController@updateReservation'); tidak jadi
 Route::get('carparkslot','CarParkSlotController@index');
 Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@statusAvailableSlot');
-Route::get('carparkslot/{id_user_park}','CarParkSlotController@statusById');
+// Route::get('carparkslot/{id_user_park}','CarParkSlotController@statusById'); tidak jadi
 Route::get('history/{id_user}','HistoryController@historybyId');
-Route::get('updatecharge/{id_user}','UserBalanceController@updateUserCharge');
+Route::get('balance/updatecharge/{id_user}','UserBalanceController@updateUserCharge');
 Route::get('balance/{id_user}','UserBalanceController@show');
 
 

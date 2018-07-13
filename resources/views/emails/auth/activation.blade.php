@@ -1,7 +1,7 @@
 @component('mail::message')
-# Thank You For Your Registered
+# Thank You for Your Registered
 
-For activate your SPark Account, Please click button bellow
+For activate your Parkys Account, Please click button bellow
 
 @component('mail::button', ['url' => route('auth.activate', [
         'token'=>$user_registration->activation_token,

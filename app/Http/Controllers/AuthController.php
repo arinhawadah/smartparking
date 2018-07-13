@@ -40,7 +40,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password'=>bcrypt($request->password),
-            'activation_token' => str_random(25),
+            'activation_token' => str_random(100),
             'car_type' => $request->car_type,
             'license_plate_number' => $request->license_plate_number,
         ]);
