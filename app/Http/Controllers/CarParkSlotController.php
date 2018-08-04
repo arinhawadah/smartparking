@@ -68,7 +68,7 @@ class CarParkSlotController extends Controller
         ->where('id_slot','=', $user_park['id_slot'])
         ->first();
 
-        if($car_park_slot['status'] == 'PARKED')
+        if($car_park_slot['status'] == 'PARKED'||$car_park_slot['status'] == 'OCCUPIED')
         {
             $sub_time_1 = strtotime($user_park['arrive_time']) - 60; // "- 60" means, arrive_time - 1 minutes
             $arrive_time1 = date('H:i', $sub_time_1);
@@ -86,8 +86,8 @@ class CarParkSlotController extends Controller
             if ($day_check != NULL)
             {
                 try { //cobain pake foreach deh rin misal cek slot 1 -> ada jam itu atau nggak, kalo ada lanjut ke slot 2,3,4,5,dst
-                    $from = min($arrive_time, $leaving_time);
-                    $till = max($arrive_time, $leaving_time);
+                    $from = min(now(), $user_park['leaving_time']);
+                    $till = max(now(), $user_park['leaving_time']);
 
                     $user_park = UserPark::where('arrive_time', '<=', date('Y-m-d').' '.$from)
                     ->where('leaving_time', '>=', date('Y-m-d').' '.$till)
@@ -102,7 +102,7 @@ class CarParkSlotController extends Controller
                     $car_park_slot = $car_park_slot
                     ->where('status','<>' ,'PARKED')
                     ->whereNotIn('id_slot', $user_park)
-                    ->select('car_park_slots.id_slot','car_park_slots.slot_name')
+                    ->select('car_park_slots.*')
                     ->orderBy('car_park_slots.id_slot','asc')
                     ->firstOrFail();
                     
@@ -114,21 +114,17 @@ class CarParkSlotController extends Controller
             {
                 $car_park_slot = $car_park_slot
                 ->where('status', 'AVAILABLE')
-                ->select('car_park_slots.id_slot','car_park_slots.slot_name')
+                ->select('car_park_slots.*')
                 ->orderBy('car_park_slots.id_slot','asc')
                 // ->take(0)
                 ->firstOrFail();
             }
-    
-            return fractal()
-                    ->item($car_park_slot)
-                    ->transformWith(new AvailableTimeTransformer)
-                    ->toArray();
-            
-                    return response()->json($response, 201);
         }
 
-        return response()->json(['status' => $car_park_slot->status], 200);
+        return fractal()
+        ->item($car_park_slot)
+        ->transformWith(new CarParkSlotTransformer)
+        ->toArray();
     }
 
     // get first available slot
@@ -149,7 +145,7 @@ class CarParkSlotController extends Controller
 
         if ($day_check != NULL)
         {
-            try { //cobain pake foreach deh rin misal cek slot 1 -> ada jam itu atau nggak, kalo ada lanjut ke slot 2,3,4,5,dst
+            try {
                     $from = min($arrive_time, $leaving_time);
                     $till = max($arrive_time, $leaving_time);
 
@@ -191,21 +187,21 @@ class CarParkSlotController extends Controller
                 return response()->json($response, 201);
     }
 
-    // get status by time arrive
-    public function slotByTime(UserPark $user_park, $time)
-    {
-        // $user_park = $user_park
-        // ->whereDate('arrive_time','=', $time)
-        // ->orWhereTime('leaving_time','=', $time)
-        // ->get();
+    // // get status by time arrive
+    // public function slotByTime(UserPark $user_park, $time)
+    // {
+    //     // $user_park = $user_park
+    //     // ->whereDate('arrive_time','=', $time)
+    //     // ->orWhereTime('leaving_time','=', $time)
+    //     // ->get();
 
-        $user_park = $user_park
-        ->whereDay('arrive_time', $time)
-        ->whereDay('leaving_time', $time)
-        ->count();
+    //     $user_park = $user_park
+    //     ->whereDay('arrive_time', $time)
+    //     ->whereDay('leaving_time', $time)
+    //     ->count();
 
-        return response()->json($user_park, 201);
-    }
+    //     return response()->json($user_park, 201);
+    // }
 
     //search slot by id_user_park
     public function edit(Request $request, $id_slot)
@@ -248,13 +244,9 @@ class CarParkSlotController extends Controller
 
         $this->updateSensor($input);
         
-        // $this->createCarParkSlotDumps($slot, $input, $slot_name); // create new entry data car_park_slot_dumps
         if ($request->wantsJson())
         {
-        return fractal()
-        ->item($car_park_slot)
-        ->transformWith(new CarParkSlotTransformer)
-        ->toArray();
+            return response()->json("Success");
         }
 
         return redirect()->intended('/slot-admin');
@@ -308,10 +300,7 @@ class CarParkSlotController extends Controller
 
         if ($request->wantsJson())
         {
-            return fractal()
-            ->item($editslot)
-            ->transformWith(new CarParkSlotTransformer)
-            ->toArray();
+            return response()->json("Success");
         }
 
         return redirect()->intended('/slot-admin');
@@ -324,23 +313,15 @@ class CarParkSlotController extends Controller
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
         // CarParkSlotDump::where('id_slot', $id_slot)->delete();
+        CarParkSlot::findOrFail($id_slot);
         CarParkSlot::where('id_slot', $id_slot)->delete();
+
+        if($request->wantsJson())
+        {
+        return response()->json('Delete Success');
+        }
 
         return redirect()->intended('/slot-admin');
     }
     
-    // // create table car_park_slot_dump
-    // private function createCarParkSlotDumps($slot, $input, $slot_name)
-    // {
-    //     $car_park_slot_dump = CarParkSlotDump::create(
-    //         [
-    //             'id_slot' => $slot,
-    //             'id_sensor' => $input['id_sensor'],
-    //             'status'  => $input['status'],
-    //             'slot_name' => $slot_name,
-    //         ]
-    //     );
-
-    //     return $car_park_slot_dump;
-    // }
 }

@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
-                <div class="panel-heading">Update Reservation User {{$slot->id_slot}}</div>
+                <div class="panel-heading">Update Slot {{$slot->id_slot}}</div>
                 <div class="panel-body">
                 <form class="form-horizontal" role="form" method="POST" action="{{ route('slot-admin.update', ['id_slot' => $slot->id_slot]) }}">
                 <input type="hidden" name="_method" value="PATCH">

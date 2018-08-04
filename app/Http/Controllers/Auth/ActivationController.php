@@ -42,7 +42,7 @@ class ActivationController extends Controller
 
         // return redirect()->route('home')->withSuccess('Aktif, skrg kamu signed in');
 
-        // $img = file_get_contents(public_path('Faith.png'));
+        // $img = file_get_contents(public_path('parkys.png'));
         // return response($img)->header('Content-type','image/jpg');
         return "Thank You";
     }

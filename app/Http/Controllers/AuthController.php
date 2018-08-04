@@ -100,15 +100,11 @@ class AuthController extends Controller
         ->attach(Role::where('role_name', 'Admin')
         ->first());
        
-        // return fractal()
-        // ->item($user)
-        // ->transformWith(new UserCredentialTransformer)
-        // ->addMeta([
-        //     'activation token' => $user->activation_token,
-        // ])
-        // ->toArray();
+        if($request->wantsJson())
+        {
+        return response()->json('Register Success');
+        }
 
-        // return response()->json($response, 201);
         return redirect()->intended('/user-admin');
     }
 
@@ -147,7 +143,6 @@ class AuthController extends Controller
                     ->item($user)
                     ->transformWith(new UserCredentialTransformer)
                     ->addMeta([
-                        // 'token' => $user->activation_token,
                         'token' => $token,
                     ])
                     ->toArray();

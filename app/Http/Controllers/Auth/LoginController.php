@@ -61,6 +61,11 @@ class LoginController extends Controller
         if (!Auth::attempt(['email'=>$request->email,'password'=>$request->password],true)){
             return response()->json(['error'=>'Your credential is wrong'],401);
         }
+
+        if($request->wantsJson())
+        {
+        return response()->json('Login Success');
+        }
     }
 
     /**

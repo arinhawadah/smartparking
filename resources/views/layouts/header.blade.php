@@ -4,7 +4,7 @@
     <!-- Logo -->
     <a href="#" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>P</b>Y</span>
+      <span class="logo-mini"><b>P</span>
       <!-- logo for regular state and mobile devices -->
       <span class="logo-lg">{{ config('app.name', 'EmployeeManagement') }}</span>
     </a>
@@ -44,7 +44,7 @@
                   </div>
                @else
                  <div class="pull-left">
-                    <a href="{{ url('user-admin/profile') }}" class="btn btn-default btn-flat">Profile</a>
+                    <a href="{{ url('profile') }}" class="btn btn-default btn-flat">Profile</a>
                   </div>
                  <div class="pull-right">
                     <a class="btn btn-default btn-flat" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();">

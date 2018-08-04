@@ -33,6 +33,11 @@ class ParkSensorController extends Controller
             'status' => $request->status,
             'time' => now()]
         );
+
+        if ($request->wantsJson())
+        {
+            return response()->json("Success");
+        }
         
         return redirect()->intended('/sensor-admin');
     }
@@ -41,6 +46,14 @@ class ParkSensorController extends Controller
     public function index(Request $request, ParkSensor $park_sensor)
     {
         $park_sensor = $park_sensor->paginate($park_sensor->count());
+
+        if ($request->wantsJson())
+        {
+            return fractal()
+            ->collection($park_sensor)
+            ->transformWith(new ParkSensorTransformer)
+            ->toArray();
+        }
 
         return view('sensor-mgmt/index', ['slot' => $park_sensor]);
     }
@@ -51,8 +64,14 @@ class ParkSensorController extends Controller
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
         // CarParkSlotDump::where('id_sensor', $id_sensor)->delete();
+        ParkSensor::where('id_sensor',$id_sensor)->select('id_sensor')->firstOrFail();
         ParkSensor::where('id_sensor', $id_sensor)->delete();
         ParkSensorResponse::where('id_sensor', $id_sensor)->delete();
+
+        if ($request->wantsJson())
+        {
+            return response()->json('Delete Success');
+        }
 
         return redirect()->intended('/sensor-admin');
     }
@@ -86,7 +105,13 @@ class ParkSensorController extends Controller
 
         $id_sensor = ParkSensor::where('entry', $entry)->pluck('id_sensor');
         $this->updateStatusSlot($input, $id_sensor);
-        $park_sensor = ParkSensor::where('entry', $entry)->update($input);
+        ParkSensor::where('entry', $entry)->update($input);
+        $park_sensor = ParkSensor::findOrFail($entry);
+
+        if ($request->wantsJson())
+        {
+            return response()->json("Success");
+        }
         
         return redirect()->intended('/sensor-admin');
     }

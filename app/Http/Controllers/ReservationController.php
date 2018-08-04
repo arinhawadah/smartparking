@@ -32,8 +32,6 @@ class ReservationController extends Controller
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        // $users = $user->all();
-
         $users = $user_park
         ->leftJoin('user_credentials','user_parks.id_user','=','user_credentials.id_user')
         ->leftJoin('car_park_slots','user_parks.id_slot','=','car_park_slots.id_slot')
@@ -43,13 +41,10 @@ class ReservationController extends Controller
         ->orderBy('id_user_park', 'desc')
         ->paginate(10);
 
-        // if ($request->wantsJson())
-        // {
-        // return fractal()
-        // ->collection($users)
-        // ->transformWith(new UserCredentialTransformer)
-        // ->toArray();
-        // }
+        if ($request->wantsJson())
+        {
+            return response()->json($users);
+        }
 
         return view('reservation-mgmt/index', ['users' => $users]);
     }
@@ -154,6 +149,11 @@ class ReservationController extends Controller
         ]);
 
         $this->historyTransactionfromAdmin($user_park);
+
+        if ($request->wantsJson())
+        {
+            return response()->json("Success");
+        }
         return redirect()->intended('/reservation-admin');
     }
 
@@ -169,12 +169,24 @@ class ReservationController extends Controller
         $this->validate($request, $constraints);
 
         // $this->updateReservationTime($update, $id_reservation); // update reservation time 
-        $user_park = $user_park->where('id_user_park', $id_user_park)
+        $user_park->where('id_user_park', $id_user_park)
             ->update(
                 [
                     'id_slot' => $request->id_slot,
+                    'price'   => $user_park->price + 1500,
                 ]
             );
+        
+        $old_balance = UserBalance::where('id_user', $user_park['id_user'])->pluck('balance')->first();
+
+        $new_balance = $old_balance - 1500;
+
+        if($new_balance < 0)
+        {
+            return response()->json(['error' => 'Insufficient balance'], 402);
+        }         
+
+        UserBalance::where('id_user', $user_park['id_user'])->update(['balance' => $new_balance]);
 
         $editreservation = UserPark::findOrFail($id_user_park);
         
@@ -235,7 +247,12 @@ class ReservationController extends Controller
             );
     
             $editreservation = UserPark::findOrFail($id_user_park);
-    
+
+            if ($request->wantsJson())
+            {
+                return response()->json("Success");
+            }
+
             return redirect()->intended('reservation-admin');
     }
 
@@ -302,14 +319,6 @@ class ReservationController extends Controller
         $user = UserPark::findOrFail($id_user_park);
         $slot = CarParkSlot::all();
 
-        // if ($request->wantsJson())
-        // {
-        // return fractal()
-        // ->item($user)
-        // ->transformWith(new UserCredentialTransformer)
-        // ->toArray();
-        // }
-        
         return view('reservation-mgmt/edit', ['user' => $user, 'slot' => $slot]);
     }
 
@@ -324,6 +333,10 @@ class ReservationController extends Controller
 
        $users = $this->doSearchingQuery($constraints);
 
+       if ($request->wantsJson())
+       {
+           return response()->json($users);
+       }
         return view('reservation-mgmt/index', ['users' => $users, 'searchingVals' => $constraints]);
     }
 

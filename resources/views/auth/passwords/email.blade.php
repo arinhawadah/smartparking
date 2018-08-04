@@ -27,7 +27,8 @@
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="login-logo">
-    <a href="#"><b>Parkys</b></a>
+    <!-- <a href="#"><b>Parkys</b></a> -->
+    <img src="{{ asset("/bower_components/AdminLTE/dist/img/parkys-horiz.png") }}" height="100" width="300" alt="Logo Image">
   </div>
   <!-- /.login-logo -->
   <div class="login-box-body">

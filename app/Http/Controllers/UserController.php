@@ -23,20 +23,12 @@ class UserController extends Controller
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        // $users = $user->all();
-        // $users = User::whereHas('roles', function($q)
-        // {
-        //     $q->whereIn('role_name', ['Admin', 'Super Admin']);
-        // })->paginate(10);
-        $users = User::with('roles')->paginate(10);
+        $users = User::with('roles')->select('id_user','email','name','name','license_plate_number')->paginate(10);
         
-        // if ($request->wantsJson())
-        // {
-        // return fractal()
-        // ->collection($users)
-        // ->transformWith(new UserCredentialTransformer)
-        // ->toArray();
-        // }
+        if ($request->wantsJson())
+        {
+        return response()->json($users);
+        }
 
         return view('users-mgmt/index', ['users' => $users]);
     }
@@ -80,10 +72,7 @@ class UserController extends Controller
 
         if ($request->wantsJson())
         {
-        return fractal()
-        ->item($edituser)
-        ->transformWith(new UserCredentialTransformer)
-        ->toArray();
+        return response()->json("Success");
         }
 
         return redirect()->intended('/user-admin');
@@ -93,11 +82,16 @@ class UserController extends Controller
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
+        User::findOrFail($id_user);
         DB::table('role_user')->where('user_id_user', $id_user)->delete();
         UserPark::where('id_user', $id_user)->delete();
         User::where('id_user', $id_user)->delete();
 
-        // return response()->json('Delete User Success');
+        if ($request->wantsJson())
+        {
+        return response()->json("Delete Success");
+        }
+
         return redirect()->intended('/user-admin');
     }
 
@@ -134,10 +128,10 @@ class UserController extends Controller
 
        $users = $this->doSearchingQuery($constraints);
 
-        // return fractal()
-        // ->item($user)
-        // ->transformWith(new UserCredentialTransformer)
-        // ->toArray();
+        if ($request->wantsJson())
+        {
+        return response()->json($users);
+        }
 
         return view('users-mgmt/index', ['users' => $users, 'searchingVals' => $constraints]);
     }

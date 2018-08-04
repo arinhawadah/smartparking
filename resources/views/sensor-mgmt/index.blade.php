@@ -6,7 +6,7 @@
   <div class="box-header">
     <div class="row">
         <div class="col-sm-8">
-          <h3 class="box-title">List of slots</h3>
+          <h3 class="box-title">List of sensors</h3>
         </div>
         <div class="col-sm-4">
           <a class="btn btn-primary" href="{{ route('sensor-admin.create') }}">Add new sensor</a>

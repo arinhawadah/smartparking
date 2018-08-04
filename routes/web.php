@@ -38,10 +38,10 @@ Route::resource('slot-admin', 'CarParkSlotController');
 // Route::post('admin/updateslot/{slot_name}', 'CarParkSlotController@updateParkSlot')->name('update-slot');
 // Route::post('admin/addslot', 'CarParkSlotController@createParkSlot')->name('create-slot');
 // Route::delete('admin/deleteslot/{slot_name}','CarParkSlotController@deleteParkSlot')->name('delete-slot');
-Route::get('admin/carparkslot/{time}','CarParkSlotController@slotByTime');
+// Route::get('admin/carparkslot/{time}','CarParkSlotController@slotByTime');
 
 Route::resource('user-admin', 'UserController');
-Route::get('user-admin/profile','UserController@profile');
+Route::get('profile','UserController@profile');
 // Route::get('admin/showuser','UserController@users');
 Route::get('admin/createuser','UserController@createUser');
 Route::post('user-admin/search','UserController@showUserbyEmail')->name('user-search');

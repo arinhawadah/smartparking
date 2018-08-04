@@ -6,10 +6,11 @@
   <div class="box-header">
     <div class="row">
         <div class="col-sm-8">
-          <h3 class="box-title">List of users</h3>
+          <h3 class="box-title">List of reservations</h3>
         </div>
         <div class="col-sm-4">
-          <a class="btn btn-primary" href="{{ route('reservation-admin.create') }}">Add new reservation</a>
+          <a class="btn btn-primary" 
+          href="{{ route('reservation-admin.create') }}">Add new reservation</a>
         </div>
     </div>
   </div>
@@ -54,11 +55,9 @@
                     <form class="row" method="POST" action="{{ route('reservation-admin.destroy', ['id_user_park' => $user->id_user_park]) }}" onsubmit = "return confirm('Are you sure?')">
                         <input type="hidden" name="_method" value="DELETE">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        @if ($user->email != Auth::user()->email)
                          <button type="submit" class="btn btn-danger col-sm-8 col-xs-8 btn-margin">
                           Delete
                         </button>
-                        @endif
                     </form>
                   </td>
                   <td class="hidden-xs">{{ $user->id_user_park }}</td>

@@ -19,20 +19,19 @@
       @if (Auth::user()->roles()->pluck('role_name')->first() != 'User')
       <ul class="sidebar-menu">
         <li class="header">MAIN NAVIGATION</li>
-        <li class="active"><a href="{{ route('allreservations') }}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
-        <!-- <li class="active"><a href="{{ url('admin/allslot') }}"><i class="fa fa-link"></i> <span>Dashboard</span></a></li> -->
-        <li><a href="{{ route('reservation-admin.index') }}"><i class="fa fa-car"></i> <span>Reservation Management</span></a></li>
-        <li><a href="{{ route('slot-admin.index') }}"><i class="fa fa-map-pin"></i> <span>Slot Management</span></a></li>
-        <li><a href="{{ route('sensor-admin.index') }}"><i class="fa fa-bullseye"></i> <span>Sensor Management</span></a></li>
-        <li class="treeview">
+        <li class="{{ Route::currentRouteName() == 'allreservations' ? 'active' : '' }}"><a href="{{ route('allreservations') }}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
+        <li class="{{ Route::currentRouteName() == 'reservation-admin.index' ? 'active' : '' }}"><a href="{{ route('reservation-admin.index') }}"><i class="fa fa-car"></i> <span>Reservation Management</span></a></li>
+        <li class="{{ Route::currentRouteName() == 'slot-admin.index' ? 'active' : '' }}"><a href="{{ route('slot-admin.index') }}"><i class="fa fa-map-pin"></i> <span>Slot Management</span></a></li>
+        <li class="{{ Route::currentRouteName() == 'sensor-admin.index' ? 'active' : '' }}"><a href="{{ route('sensor-admin.index') }}"><i class="fa fa-bullseye"></i> <span>Sensor Management</span></a></li>
+        <li class="treeview {{ Route::currentRouteName() == 'user-admin.index' || Route::currentRouteName() == 'balance-admin.index'  ? 'active' : '' }}">
           <a href="#"><i class="fa fa-users"></i> <span>User Management</span>
             <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="{{ route('user-admin.index') }}">User Data</a></li>
-            <li><a href="{{ route('balance-admin.index') }}">User Balance</a></li>
+            <li class="{{ Route::currentRouteName() == 'user-admin.index' ? 'active' : '' }}"><a href="{{ route('user-admin.index') }}">User Data</a></li>
+            <li class="{{ Route::currentRouteName() == 'balance-admin.index'  ? 'active' : '' }}"><a href="{{ route('balance-admin.index') }}">User Balance</a></li>
           </ul>
         </li>
         <!-- <li>

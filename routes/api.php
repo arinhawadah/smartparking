@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 //     return $request->user();
 // });
 
+Auth::routes();
 //user
 Route::post('auth/register-user','AuthController@register')->name('register-user');
 Route::post('auth/login','AuthController@login');
@@ -25,16 +26,14 @@ Route::post('auth/resetpassword/sendemail','AuthController@ResetPassword')->name
 // Route::put('users/updateprofile/{id_user}','UserController@updateProfile');
 Route::post('reservation/add','ReservationController@addReservation')->middleware('cors');
 Route::delete('reservation/cancel/{id_user_park}','ReservationController@destroy');
-// Route::patch('updatereserevation/{id_user_park}','ReservationController@updateReservation'); tidak jadi
+Route::patch('reservation/changeslot/{id_user_park}','ReservationController@updateReservation'); //revisi
 Route::get('carparkslot','CarParkSlotController@index');
 Route::get('carparkslot/{arrive_time}-{leaving_time}','CarParkSlotController@statusAvailableSlot');
-// Route::get('carparkslot/{id_user_park}','CarParkSlotController@statusById'); tidak jadi
+Route::get('carparkslot/checkslot/{id_user_park}','CarParkSlotController@statusById'); //revisi
 Route::get('history/{id_user}','HistoryController@historybyId');
-Route::get('balance/updatecharge/{id_user}','UserBalanceController@updateUserCharge');
+Route::get('balance/penaltycharge/{id_user}','UserBalanceController@penaltyCharge');//ubah
 Route::get('balance/{id_user}','UserBalanceController@show');
-
-
-// Route::get('cobacoba','CarParkSlotController@cobacoba');
+Route::get('balance/addcharge/{id_user}','UserBalanceController@additionalCharge'); //revisi
 
 //admin
 
@@ -52,6 +51,25 @@ Route::get('balance/{id_user}','UserBalanceController@show');
 // Route::get('admin/showuseremail/{email}','UserController@showUserbyEmail')->middleware('auth.basic');
 // Route::get('admin/carparkslot/{time}','CarParkSlotController@statusByTime');
 // Route::delete('deletesensor/{id_sensor}','ParkSensorController@deleteParkSensor')->middleware('cors');
+
+// Route::resource('sensor-admin', 'ParkSensorController');
+
+// Route::resource('slot-admin', 'CarParkSlotController');
+// Route::get('admin/carparkslot/{time}','CarParkSlotController@slotByTime');
+
+// Route::resource('user-admin', 'UserController');
+// Route::get('profile','UserController@profile');
+// Route::get('admin/createuser','UserController@createUser');
+// Route::post('user-admin/search','UserController@showUserbyEmail')->name('user-search');
+
+// Route::resource('reservation-admin', 'ReservationController')->middleware('auth.basic');
+// Route::post('reservation-admin/search','ReservationController@showReservationbyUser')->name('reservation-search')->middleware('auth.basic');
+// Route::get('reservations','DashboardController@allSlotByTime')->name('allreservations');
+
+// Route::post('auth/register-admin', 'AuthController@registerAdmin')->name('register-admin');
+
+// Route::resource('balance-admin', 'UserBalanceController');
+// Route::post('balance-admin/search', 'UserBalanceController@search')->name('balance-search');
 
 // sensor
 Route::get('parksensor/id_sensor={id_sensor}&&status={status}','ParkSensorResponseController@addSensor');

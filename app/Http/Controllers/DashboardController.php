@@ -17,7 +17,7 @@ class DashboardController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth.basic');
     }
 
     // get status by time arrive
@@ -60,7 +60,7 @@ class DashboardController extends Controller
         
         $month = array_column($month, 'b');
 
-        $visitor_day = $user_park->whereMonth('arrive_time','=', date('06'))
+        $visitor_day = $user_park->whereMonth('arrive_time','=', date('m'))
         ->select(DB::raw("COUNT(id_user_park) as count"), DB::raw("weekday(arrive_time) as weekday"))
         ->groupBy('weekday')
         ->orderBy('weekday')
@@ -74,7 +74,7 @@ class DashboardController extends Controller
         $visitor_day = array_column($visitor_day, 'count');
         // $day = array_column($visitor_day, 'day');
 
-        $day = $user_park->whereMonth('arrive_time','=', date('06'))
+        $day = $user_park->whereMonth('arrive_time','=', date('m'))
         ->select(DB::raw('date_format(arrive_time,"%a") as day'), DB::raw("weekday(arrive_time) as weekday"))
         ->groupBy('weekday','day')
         ->orderBy('weekday')
@@ -83,14 +83,14 @@ class DashboardController extends Controller
         
         $day = array_column($day, 'day');
 
-        $visitor_time = $user_park->whereMonth('arrive_time','=', date('06'))
+        $visitor_time = $user_park->whereMonth('arrive_time','=', date('m'))
         ->select(DB::raw('COUNT(id_user_park) as count'))
         ->groupBy(DB::raw('date_format(arrive_time,"%H:%i")'))
         ->get()->toArray();
         
         $visitor_time = array_column($visitor_time, 'count');
         
-        $time = $user_park->whereMonth('arrive_time','=', date('06'))
+        $time = $user_park->whereMonth('arrive_time','=', date('m'))
         ->select(DB::raw('date_format(arrive_time,"%H:%i") as time'))
         ->groupBy('time')
         ->get()->toArray();
@@ -101,10 +101,11 @@ class DashboardController extends Controller
         
         $time = array_column($time, 'time');
 
-        // return fractal()
-        // ->collection($user_park)
-        // ->transformWith(new UserParkTimeTransformer)
-        // ->toArray();
+        if ($request->wantsJson())
+        {
+            return response()->json(['visitor_day'=>$visitor_day, 'visitor_month'=>$visitor_month, 'visitor_time'=> $visitor_time, 
+            'time'=> $time, 'month'=>$month, 'day'=>$day, 'year'=>$year]);
+        }
 
         // return response()->json($visitor_times);
         return view('dashboard')

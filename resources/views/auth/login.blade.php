@@ -27,7 +27,8 @@
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="login-logo">
-    <a href="#"><b>Parkys</b></a>
+    <img src="{{ asset("/bower_components/AdminLTE/dist/img/parkys-horiz.png") }}" height="100" width="300" alt="Logo Image">
+    <!-- <a href="#"><b>Parkys</b></a> -->
   </div>
   <!-- /.login-logo -->
   <div class="login-box-body">
@@ -75,7 +76,7 @@
     </form>
 <br>
     <a class="text-center" href="{{ route('password.request') }}">I forgot my password</a><br>
-    <a href="register.html" class="text-center">Register a new membership</a>
+    <!-- <a href="register.html" class="text-center">Register a new membership</a> -->
 
   </div>
   <!-- /.login-box-body -->

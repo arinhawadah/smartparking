@@ -22,6 +22,11 @@ class UserBalanceController extends Controller
         'user_credentials.id_user','=','user_balances.id_user')
         ->select('email','user_balances.*')
         ->paginate(10);
+
+        if ($request->wantsJson())
+        {
+            return response()->json($user_balance);
+        }
         
         return view('balance-mgmt/index', ['balance' => $user_balance]);
     }
@@ -63,6 +68,11 @@ class UserBalanceController extends Controller
             if($errorCode == '1062'){
                 return redirect()->back();
             }
+        }
+
+        if ($request->wantsJson())
+        {
+            return response()->json("Success");
         }
 
         return redirect()->intended('balance-admin');
@@ -122,6 +132,11 @@ class UserBalanceController extends Controller
 
         UserBalance::where('id_balance', $id_balance)->update($input);
 
+        if ($request->wantsJson())
+        {
+            return response()->json("Success");
+        }
+
         return redirect()->intended('/balance-admin');
     }
 
@@ -131,9 +146,15 @@ class UserBalanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id_balance)
+    public function destroy(Request $request, $id_balance)
     {
+        ParkSensor::findOrFail($id_balance);
         UserBalance::where('id_balance', $id_balance)->delete();
+
+        if ($request->wantsJson())
+        {
+            return response()->json("Delete Success");
+        }
 
         return redirect()->intended('/balance-admin');
     }
@@ -146,6 +167,10 @@ class UserBalanceController extends Controller
 
        $balance = $this->doSearchingQuery($constraints);
 
+       if ($request->wantsJson())
+       {
+           return response()->json($balance);
+       }
         return view('balance-mgmt/index', ['balance' => $balance, 'searchingVals' => $constraints]);
     }
 
@@ -166,11 +191,31 @@ class UserBalanceController extends Controller
         return $query->paginate($querys);
     }
 
-    public function updateUserCharge(Request $request, $id_user)
+    public function penaltyCharge(Request $request, $id_user)
     {
         $old_balance = UserBalance::where('id_user', $id_user)->pluck('balance')->first();
 
         $new_balance = $old_balance - 20000;
+
+        $input = [
+            'balance' =>  $new_balance,
+            ];
+
+        if($new_balance < 0)
+        {
+            return response()->json(['error' => 'Insufficient balance'], 402);
+        }            
+
+        UserBalance::where('id_user', $id_user)->update($input);
+
+        return response()->json(['msg'=>'Success']);
+    }
+
+    public function additionalCharge(Request $request, $id_user)
+    {
+        $old_balance = UserBalance::where('id_user', $id_user)->pluck('balance')->first();
+
+        $new_balance = $old_balance - 1500;
 
         $input = [
             'balance' =>  $new_balance,
