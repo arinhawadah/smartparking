@@ -24,8 +24,10 @@
                             <label for="status" class="col-md-4 control-label">Status</label>
 
                             <div class="col-md-6">
-                                <input id="status" type="text" class="form-control" name="status" value="{{ $slot->status }}" required>
-
+                                <!-- <input id="status" type="text" class="form-control" name="status" value="{{ $slot->status }}" required> -->
+                                <input type="radio" name="status" value="AVAILABLE"> AVAILABLE <br>
+                                <input type="radio" name="status" value="OCCUPIED"> OCCUPIED <br>
+                                <input type="radio" name="status" value="PARKED"> PARKED
                                 @if ($errors->has('status'))
                                     <span class="help-block">
                                         <strong>{{ $errors->first('status') }}</strong>

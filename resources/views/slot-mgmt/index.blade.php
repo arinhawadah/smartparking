@@ -22,11 +22,11 @@
     <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
       <div class="row">
         <div class="col-sm-12 box-body table-responsive">
-          <table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
+          <table id="example2" class="table table-hover" role="grid" aria-describedby="example2_info">
             <thead>
               <tr role="row">
                 <th width="15%" tabindex="0" aria-controls="example2" rowspan="1" colspan="2">Action</th>
-                <th width="5%" class="hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" >Id</th>
+                <th width="5%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" >Id</th>
                 <th width="20%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Slot Name</th>
                 <th width="10%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Id Sensor</th>
                 <th width="20%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Status</th>
@@ -51,7 +51,7 @@
                         @endif
                     </form>
                   </td>
-                  <td class="hidden-xs">{{ $slots->id_slot }}</td>
+                  <td >{{ $slots->id_slot }}</td>
                   <td >{{ $slots->slot_name }}</td>
                   <td>{{ $slots->id_sensor }}</td>
                   <td>{{ $slots->status }}</td>

@@ -84,15 +84,17 @@ class DashboardController extends Controller
         $day = array_column($day, 'day');
 
         $visitor_time = $user_park->whereMonth('arrive_time','=', date('m'))
-        ->select(DB::raw('COUNT(id_user_park) as count'))
-        ->groupBy(DB::raw('date_format(arrive_time,"%H:%i")'))
+        ->select(DB::raw('COUNT(id_user_park) as count'), DB::raw('date_format(arrive_time,"%h %p") as time'), DB::raw('date_format(arrive_time,"%H") as time_asc'))
+        ->groupBy('time', 'time_asc')
+        ->orderBy('time_asc')
         ->get()->toArray();
         
         $visitor_time = array_column($visitor_time, 'count');
         
         $time = $user_park->whereMonth('arrive_time','=', date('m'))
-        ->select(DB::raw('date_format(arrive_time,"%H:%i") as time'))
-        ->groupBy('time')
+        ->select(DB::raw('date_format(arrive_time,"%h %p") as time'), DB::raw('date_format(arrive_time,"%H") as time_asc'))
+        ->groupBy('time', 'time_asc')
+        ->orderBy('time_asc')
         ->get()->toArray();
 
         // $time = $user_park->select(DB::raw('hour(arrive_time) as time'))

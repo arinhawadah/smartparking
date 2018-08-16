@@ -63,7 +63,7 @@
                             <label for="price" class="col-md-4 control-label">Price</label>
 
                             <div class="col-md-6">
-                                <input id="price" type="price" class="form-control" name="price" value="{{ old('price') }}">
+                                <input id="price" type="number" min="0" step="500" class="form-control" name="price" value="{{ old('price') }}">
 
                                 @if ($errors->has('price'))
                                     <span class="help-block">

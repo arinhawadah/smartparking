@@ -31,6 +31,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
+  <link rel="icon" type="image/ico" href="{{ asset("/bower_components/AdminLTE/dist/img/parkys.png") }}" />
 </head>
 <!--
 BODY TAG OPTIONS:
@@ -359,69 +360,6 @@ desired effect
 
     barChartOptions.datasetFill = false;
     barChart.Bar(barChartData, barChartOptions);
-
-    // /*
-    //  * DONUT CHART
-    //  * -----------
-    //  */
-
-    // var donutData = [
-    //   {label: "Series2", data: 30, color: "#3c8dbc"},
-    //   {label: "Series3", data: 20, color: "#0073b7"},
-    //   {label: "Series4", data: 50, color: "#00c0ef"}
-    // ];
-    // $.plot("#donut-chart", donutData, {
-    //   series: {
-    //     pie: {
-    //       show: true,
-    //       radius: 1,
-    //       innerRadius: 0.5,
-    //       label: {
-    //         show: true,
-    //         radius: 2 / 3,
-    //         formatter: labelFormatter,
-    //         threshold: 0.1
-    //       }
-
-    //     }
-    //   },
-    //   legend: {
-    //     show: false
-    //   }
-    // });
-    // /*
-    //  * END DONUT CHART
-    //  */
-
-    // /*
-    //  * BAR CHART
-    //  * ---------
-    //  */
-
-    // var bar_data = {
-    //   data: [[data_day[0], data_visitor_day[0]], [data_day[1], data_visitor_day[1]], [data_day[2], data_visitor_day[2]], [data_day[3], data_visitor_day[3]], [data_day[4], data_visitor_day[4]], [data_day[5], data_visitor_day[5]], 
-    //   [data_day[6], data_visitor_day[6]]],
-    //   color: "#3c8dbc"
-    // };
-    // $.plot("#bar-chart", [bar_data], {
-    //   grid: {
-    //     borderWidth: 1,
-    //     borderColor: "#f3f3f3",
-    //     tickColor: "#f3f3f3"
-    //   },
-    //   series: {
-    //     bars: {
-    //       show: true,
-    //       barWidth: 0.5,
-    //       align: "center"
-    //     }
-    //   },
-    //   xaxis: {
-    //     mode: "categories",
-    //     tickLength: 0
-    //   }
-    // });
-    // /* END BAR CHART */
 
     //-------------
     //- BAR CHART -

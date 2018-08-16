@@ -14,8 +14,10 @@
                             <label for="status" class="col-md-4 control-label">Status</label>
 
                             <div class="col-md-6">
-                                <input id="status" type="text" class="form-control" name="status" value="{{ $sensor->status }}" required>
-
+                                <!-- <input id="status" type="text" class="form-control" name="status" value="{{ $sensor->status }}" required> -->
+                                <input type="radio" name="status" value="0"> 0 <br>
+                                <input type="radio" name="status" value="1"> 1 <br>
+                                <input type="radio" name="status" value="2"> 2
                                 @if ($errors->has('status'))
                                     <span class="help-block">
                                         <strong>{{ $errors->first('status') }}</strong>

@@ -101,7 +101,10 @@ class ParkSensorController extends Controller
             'status'=> 'required',
         ]);
 
-        $input = ['status' => $request->status];
+        $input = [
+            'status' => $request->status,
+            'time' => now(),
+        ];
 
         $id_sensor = ParkSensor::where('entry', $entry)->pluck('id_sensor');
         $this->updateStatusSlot($input, $id_sensor);
@@ -119,17 +122,17 @@ class ParkSensorController extends Controller
     // update status car_park_slot
     private function updateStatusSlot($input, $id_sensor)
     {
-        if($input == 0 ){
+        if($input['status'] == 0 ){
             $car_park_slot = CarParkSlot::where('id_sensor',$id_sensor)->update(
                 ['status' => 'AVAILABLE']
               );
         }  
-        elseif($input == 1){
+        elseif($input['status'] == 1){
             $car_park_slot = CarParkSlot::where('id_sensor',$id_sensor)->update(
                 ['status' => 'PARKED']
               );
         }
-        elseif($input == 2){
+        elseif($input['status'] == 2){
             $car_park_slot = CarParkSlot::where('id_sensor',$id_sensor)->update(
                 ['status' => 'OCCUPIED']
               );

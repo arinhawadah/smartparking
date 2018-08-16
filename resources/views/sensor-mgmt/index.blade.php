@@ -22,7 +22,7 @@
     <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
       <div class="row">
         <div class="col-sm-12 box-body table-responsive">
-          <table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
+          <table id="example2" class="table table-hover" role="grid" aria-describedby="example2_info">
             <thead>
               <tr role="row">
                 <th width="20%" tabindex="0" aria-controls="example2" rowspan="1" colspan="2" aria-label="Action: activate to sort column ascending">Action</th>

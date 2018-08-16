@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 use App\UserBalance;
+use App\UserPark;
 use App\User;
+use App\HistoryTransaction;
 use Illuminate\Database\QueryException;
 use App\Transformers\BalanceTransformer;
 use Illuminate\Http\Request;
@@ -208,26 +210,77 @@ class UserBalanceController extends Controller
 
         UserBalance::where('id_user', $id_user)->update($input);
 
+        $user_park = UserPark::where('id_user',$id_user)->orderBy('id_user_park','desc')->first();
+
+        $this->historyTransaction($user_park);
+
         return response()->json(['msg'=>'Success']);
     }
 
-    public function additionalCharge(Request $request, $id_user)
+    public function additionalCharge(Request $request, $id_user_park)
     {
-        $old_balance = UserBalance::where('id_user', $id_user)->pluck('balance')->first();
+        $user_park = UserPark::findOrFail($id_user_park);
 
-        $new_balance = $old_balance - 1500;
+        $old_balance = UserBalance::where('id_user', $user_park['id_user'])->pluck('balance')->first();
 
-        $input = [
+        $constraints = [
+            'price' => 'required',
+            ];
+
+        $this->validate($request, $constraints);
+
+        $input_price = [
+            'price'   => $user_park['price'] + $request->price,
+            'arrive_time' => now()->format('Y-m-d H:i:00'),
+        ];
+
+        $new_balance = $old_balance - $request->price;
+
+        $input_balance = [
             'balance' =>  $new_balance,
             ];
 
         if($new_balance < 0)
         {
             return response()->json(['error' => 'Insufficient balance'], 402);
-        }            
+        }
+        
+        UserPark::where('id_user_park', $id_user_park)->update($input_price);
 
-        UserBalance::where('id_user', $id_user)->update($input);
+        UserBalance::where('id_user', $user_park['id_user'])->update($input_balance);
+
+        $editprice = UserPark::findOrFail($id_user_park);
+
+        $this->updateHistoryTransaction($editprice);
 
         return response()->json(['msg'=>'Success']);
+    }
+
+    //history transaction user
+    private function historyTransaction($user_park)
+    {
+        $history_of_transaction = HistoryTransaction::insert(
+            [
+                'id_slot' => $user_park['id_slot'],
+                'id_user' => $user_park['id_user'],
+                'price' => 20000,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+        return $history_of_transaction;
+    }
+
+    //history transaction update user
+    private function updateHistoryTransaction($editprice)
+    {
+        $history_of_transaction = HistoryTransaction::where('id_user_park', $editprice['id_user_park'])
+        ->update(
+            [
+                'price' => $editprice['price'],
+                'updated_at' => now(),
+            ]
+        );
+        return $history_of_transaction;
     }
 }

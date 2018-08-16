@@ -164,6 +164,7 @@ class ReservationController extends Controller
 
         $constraints = [
             'id_slot' => 'required',
+            'price'   => 'required',
             ];
 
         $this->validate($request, $constraints);
@@ -172,14 +173,15 @@ class ReservationController extends Controller
         $user_park->where('id_user_park', $id_user_park)
             ->update(
                 [
+                    'arrive_time' => now()->format('Y-m-d H:i:00'),
                     'id_slot' => $request->id_slot,
-                    'price'   => $user_park->price + 1500,
+                    'price'   => $user_park['price'] + $request->price,
                 ]
             );
         
         $old_balance = UserBalance::where('id_user', $user_park['id_user'])->pluck('balance')->first();
 
-        $new_balance = $old_balance - 1500;
+        $new_balance = $old_balance - $request->price;
 
         if($new_balance < 0)
         {
@@ -189,6 +191,8 @@ class ReservationController extends Controller
         UserBalance::where('id_user', $user_park['id_user'])->update(['balance' => $new_balance]);
 
         $editreservation = UserPark::findOrFail($id_user_park);
+
+        $this->updateHistoryTransaction($editreservation);
         
         return fractal()
         ->item($editreservation)
@@ -247,6 +251,8 @@ class ReservationController extends Controller
             );
     
             $editreservation = UserPark::findOrFail($id_user_park);
+            
+            $this->updateHistoryTransactionfromAdmin($editreservation);
 
             if ($request->wantsJson())
             {
@@ -254,6 +260,23 @@ class ReservationController extends Controller
             }
 
             return redirect()->intended('reservation-admin');
+    }
+
+    // update status expired reservation
+    public function updateStatus($id_user_park)
+    {
+        $user_park = UserPark::findOrFail($id_user_park);
+        $car_park_slot = CarParkSlot::where('id_slot',$user_park['id_slot'])->pluck('id_sensor')->first();
+
+        CarParkSlot::where('id_slot',$user_park['id_slot'])->update(
+            ['status' => 'AVAILABLE']
+        );
+
+        ParkSensor::where('id_sensor',$car_park_slot)->update(
+            ['status' => 0]
+        );
+
+        return response()->json('Success');
     }
 
     // delete reservation
@@ -279,7 +302,7 @@ class ReservationController extends Controller
         return redirect()->intended('reservation-admin');
     }
 
-    //history transaction
+    //history transaction user
     private function historyTransaction($user_park)
     {
         $history_of_transaction = HistoryTransaction::insert(
@@ -295,7 +318,21 @@ class ReservationController extends Controller
         return $history_of_transaction;
     }
 
-    //history transaction
+    //history transaction update user
+    private function updateHistoryTransaction($editreservation)
+    {
+        $history_of_transaction = HistoryTransaction::where('id_user_park', $editreservation['id_user_park'])
+        ->update(
+            [
+                'id_slot' => $editreservation['id_slot'],
+                'price' => $editreservation['price'],
+                'updated_at' => now(),
+            ]
+        );
+        return $history_of_transaction;
+    }
+
+    //history transaction admin
     private function historyTransactionfromAdmin($user_park)
     {
         $history_of_transaction = HistoryTransaction::insert(
@@ -305,6 +342,20 @@ class ReservationController extends Controller
                 'id_user_park'  => $user_park['id_user_park'],
                 'price' => $user_park['price'],
                 'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+        return $history_of_transaction;
+    }
+
+    //history transaction update admin
+    private function updateHistoryTransactionfromAdmin($editreservation)
+    {
+        $history_of_transaction = HistoryTransaction::where('id_user_park', $editreservation['id_user_park'])
+        ->update(
+            [
+                'id_slot' => $editreservation['id_slot'],
+                'price' => $editreservation['price'],
                 'updated_at' => now(),
             ]
         );
@@ -359,86 +410,4 @@ class ReservationController extends Controller
         $querys = $query->count();
         return $query->paginate($querys);
     }
-
-    // private function updateBalance($price)
-    // {
-    //     $old_balance = UserBalance::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->pluck('balance')->first();
-
-    //     $new_balance = $old_balance - $price;
-
-    //     $input = [
-    //         'balance' =>  $new_balance,
-    //         ];
-
-    //     if($new_balance < 0)
-    //     {
-    //         return response()->json(['error' => 'Insufficient balance']);
-    //     }
-    //     UserBalance::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->update($input);
-
-    //     return;
-    // }
-
-
-    // // update status car_park_slot
-    // private function updateStatus($id_slot)
-    // {
-    //     $car_park_slot = CarParkSlot::UpdateOrCreate(
-    //         ['id_slot' =>$id_slot],
-    //         ['status' => 'OCCUPIED']
-    //     );
-
-    //     return $car_park_slot;
-    // }
-
-    // // update status park_sensor
-    // private function updateSensor($slot, $old_slot)
-    // {
-    //     $park_sensor = ParkSensor::where('id_sensor',$old_slot['id_sensor'])->update(
-    //         ['status' => 1]
-    //     );
-
-    //     $park_sensor = ParkSensor::where('id_sensor',$slot['id_sensor'])->update(
-    //         ['status' => 2]
-    //     );
-
-    //     return $park_sensor;
-    // }
-
-    // create table user_parks
-    // private function createReservationTime($input)
-    // {
-    //     $reservation_buffer = ReservationBuffer::where('id_user', JWTAuth::parseToken()->authenticate()->id_user)->where('validity_limit', now())->firstOrFail();
-
-    //     $user_park = DB::table('user_parks')->insert(
-    //         array(
-    //             'id_user' => JWTAuth::parseToken()->authenticate()->id_user,
-    //             'id_slot' => $reservation_buffer->id_slot,
-    //             'unique_id' => Auth::user()->unique_id, 
-    //             'arrive_time' => date('Y-m-d').' '.$input['arrive_time'],
-    //             'leaving_time' => date('Y-m-d').' '.$input['leaving_time'],
-    //             'price' => $input['price'],
-    //             'id_reservation'=> $reservation_buffer->id_reservation,
-    //         )
-    //     );
-
-    //     return $user_park;
-    // }
-
-    // update table user_parks
-    // private function updateReservationTime($update, $id_user_park)
-    // {
-    //     $reservation_buffer = ReservationBuffer::where('id_reservation', $id_user_park)->firstOrFail();
-
-    //     $user_park = DB::table('user_parks')->update(
-    //         array(
-    //             'id_slot' => $reservation_buffer->id_slot,
-    //             'arrive_time' => date('Y-m-d').' '.$update['arrive_time'],
-    //             'leaving_time' => date('Y-m-d').' '.$update['leaving_time'],
-    //             'price' => $update['price'],
-    //         )
-    //     );
-
-    //     return $user_park;
-    // }
 }

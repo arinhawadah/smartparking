@@ -23,7 +23,7 @@ class UserController extends Controller
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
 
-        $users = User::with('roles')->select('id_user','email','name','name','license_plate_number')->paginate(10);
+        $users = User::with('roles')->select('id_user','email','name','name','license_plate_number','car_type')->paginate(10);
         
         if ($request->wantsJson())
         {
@@ -33,7 +33,7 @@ class UserController extends Controller
         return view('users-mgmt/index', ['users' => $users]);
     }
 
-    public function profile(User $user)
+    public function profile(Request $request, User $user)
     {
         $user = $user->find(Auth::user()->id_user);
         // $user = $user->find(JWTAuth::parseToken()->authenticate()->id_user);
@@ -42,26 +42,54 @@ class UserController extends Controller
         // ->item($user)
         // ->transformWith(new UserCredentialTransformer)
         // ->toArray();
-
+        if ($request->wantsJson())
+        {
         return response()->json([$user->name, $user->email]);
+        }
+
+        return view('profile', ['user' => $user]);
     }
 
     public function update(Request $request, User $user, $id_user)
     {
         $user = User::findOrFail($id_user);
         $constraints = [
-            // 'name' => 'required',
+            'name' => 'required',
             // 'email' => 'required|unique:user_credentials'.$user->id.',id_user',
-            // 'car_type' => 'required',
-            // 'license_plate_number' => 'required',
+            'car_type' => 'required',
+            'license_plate_number' => 'required',
+            // 'password' => 'required|min:6|confirmed',
+            ];
+
+        $input = [
+            'name' => $request['name'],
+            // 'email' => $request['email'],
+            'car_type' => $request['car_type'],
+            'license_plate_number' => $request['license_plate_number'],
+            // 'password' =>  bcrypt($request['password']),
+        ];
+        
+        $this->validate($request, $constraints);
+
+        User::where('id_user', $id_user)->update($input);
+        $edituser = User::findOrFail($id_user);
+
+        if ($request->wantsJson())
+        {
+        return response()->json("Success");
+        }
+
+        return redirect()->intended('/user-admin');
+    }
+
+    public function updatePassword(Request $request, User $user, $id_user)
+    {
+        $user = User::findOrFail($id_user);
+        $constraints = [
             'password' => 'required|min:6|confirmed',
             ];
 
         $input = [
-            // 'name' => $request['name'],
-            // 'email' => $request['email'],
-            // 'car_type' => $request['car_type'],
-            // 'license_plate_number' => $request['license_plate_number'],
             'password' =>  bcrypt($request['password']),
         ];
         
@@ -95,7 +123,7 @@ class UserController extends Controller
         return redirect()->intended('/user-admin');
     }
 
-    //search user by id
+    //edit user by id
     public function edit(Request $request, User $user, $id_user)
     {
         $request->user()->authorizeRoles(['Super Admin', 'Admin']);
@@ -111,6 +139,24 @@ class UserController extends Controller
         }
         
         return view('users-mgmt/edit', ['user' => $user]);
+    }
+
+    //edit password by id
+    public function editPassword(Request $request, User $user, $id_user)
+    {
+        $request->user()->authorizeRoles(['Super Admin', 'Admin']);
+
+        $user = User::findOrFail($id_user);
+
+        if ($request->wantsJson())
+        {
+        return fractal()
+        ->item($user)
+        ->transformWith(new UserCredentialTransformer)
+        ->toArray();
+        }
+        
+        return view('users-mgmt/editpassword', ['user' => $user]);
     }
 
     //search user by email

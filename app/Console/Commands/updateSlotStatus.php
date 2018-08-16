@@ -61,23 +61,23 @@ class updateSlotStatus extends Command
             ]
         );
 
-        DB::table('park_sensors')
-        ->leftJoin('car_park_slots','park_sensors.id_sensor','=','car_park_slots.id_sensor')
-        ->where('car_park_slots.status','AVAILABLE')
-        ->update(
-            ['park_sensors.status' => 0, 
-            'time' => now(),
-            ]
-        );
+        // DB::table('park_sensors')
+        // ->leftJoin('car_park_slots','park_sensors.id_sensor','=','car_park_slots.id_sensor')
+        // ->where('car_park_slots.status','AVAILABLE')
+        // ->update(
+        //     ['park_sensors.status' => 0, 
+        //     'time' => now(),
+        //     ]
+        // );
 
-        DB::table('park_sensors')
-        ->leftJoin('car_park_slots','park_sensors.id_sensor','=','car_park_slots.id_sensor')
-        ->where('car_park_slots.status','PARKED')
-        ->update(
-            ['park_sensors.status' => 1, 
-            'time' => now(),
-            ]
-        );
+        // DB::table('park_sensors')
+        // ->leftJoin('car_park_slots','park_sensors.id_sensor','=','car_park_slots.id_sensor')
+        // ->where('car_park_slots.status','PARKED')
+        // ->update(
+        //     ['park_sensors.status' => 1, 
+        //     'time' => now(),
+        //     ]
+        // );
 
         // $slot = DB::table('car_park_slots')
         // ->where('status', 'OCCUPIED')->firstOrFail();

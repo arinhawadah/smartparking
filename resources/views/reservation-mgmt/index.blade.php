@@ -35,7 +35,7 @@
             <thead>
               <tr role="row">
                 <th width="20%" tabindex="0" aria-controls="example2" rowspan="1" colspan="2" aria-label="Action: activate to sort column ascending">Action</th>
-                <th width="5%" class="hidden-xs" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending">Id</th>
+                <th width="5%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending">Id</th>
                 <th width="15%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Name</th>
                 <th width="5%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Slot Name</th>
                 <th width="20%" tabindex="0" aria-controls="example2" rowspan="1" colspan="1">Arrival Time</th>
@@ -60,7 +60,7 @@
                         </button>
                     </form>
                   </td>
-                  <td class="hidden-xs">{{ $user->id_user_park }}</td>
+                  <td >{{ $user->id_user_park }}</td>
                   <td>{{ $user->name }}</td>
                   <td>{{ $user->slot_name }}</td>
                   <td>{{ $user->arrive_time }}</td>

@@ -25,7 +25,7 @@
                             <label for="balance" class="col-md-4 control-label">Balance</label>
 
                             <div class="col-md-6">
-                                <input id="balance" type="balance" class="form-control" name="balance" value="{{ old('balance') }}" required>
+                                <input id="balance" type="number" min="0" step="500" class="form-control" name="balance" value="{{ old('balance') }}" required>
 
                                 @if ($errors->has('balance'))
                                     <span class="help-block">
